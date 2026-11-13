@@ -779,7 +779,7 @@ setInterval(renderTyping,1500);
 async function send(){const inp=$('#inp');const text=inp.value.trim();if(!text&&!UI.img)return;if(text.length>4000){toast('Mensagem muito longa (máx. 4000 caracteres)');return}
   if(text==='/limpar'&&V.dm){DATA.dms[V.dm].msgs={};inp.value='';save();renderMsgs();return}
   if(V.srv&&V.ch&&/^\/(tocar|play|p|pular|skip|pausar|pause|continuar|resume|parar|stop|fila|queue|musica|música)\b/i.test(text)){inp.value='';autoGrow();musicCommand(text);return}
-  if(V.srv&&V.ch&&/^\/ajuda\b/i.test(text)){inp.value='';autoGrow();botSay('bot:dj',V.srv,V.ch,'**Comandos do Nexo**\n🎧 `/tocar link-do-youtube` toca ou coloca na fila\n⏭️ `/pular`  ⏸️ `/pausar`  ▶️ `/continuar`  ⏹️ `/parar`  📜 `/fila`\n✨ `@IA sua pergunta` pergunta para a IA\n🎮 botão de controle ao lado do emoji para jogar',true);return}
+  if(V.srv&&V.ch&&/^\/ajuda\b/i.test(text)){inp.value='';autoGrow();botSay('bot:dj',V.srv,V.ch,'**Comandos do Nexo**\n🎧 `/tocar nome da música` ou um link do YouTube/Spotify\n⏭️ `/pular`  ⏸️ `/pausar`  ▶️ `/continuar`  ⏹️ `/parar`  📜 `/fila`\n✨ `@IA sua pergunta` pergunta para a IA\n🎮 botão de controle ao lado do emoji para jogar',true);return}
   const m={id:uid(14),author:ME.id,text,ts:Date.now(),v:Date.now(),reactions:{}};if(UI.img)m.img=UI.img;
   const ms=curMsgs();if(UI.reply){const r=ms.find(x=>x.id===UI.reply);if(r)m.replyTo={id:r.id,author:r.author,text:(r.text||'').slice(0,100)}}
   inp.value='';autoGrow();UI.reply=null;UI.img=null;updReply();updPrev();lastTypingSent=0;
@@ -795,6 +795,12 @@ function deleteMsg(id){if(V.dm){delete DATA.dms[V.dm].msgs[id];sendDM(V.dm,{id,d
 function toggleReact(id,e){if(V.dm)return;const m=getMsg(id);if(!m)return;m.reactions??={};m.reactions[e]??={};const on=!m.reactions[e][ME.id]?.on;const t=Date.now();
   m.reactions[e][ME.id]={on,t};broadcast(V.srv,'react',{ch:V.ch,mid:id,e,u:ME.id,on,t});save();renderMsgs(false)}
 
+/* ---- recursos do servidor (Netlify Functions) ---- */
+const CAPS={ai:false,yt:false};const FN='/.netlify/functions/';
+async function loadCaps(){if(!/^https?:$/.test(location.protocol))return;
+  try{const r=await fetch(FN+'ia',{cache:'no-store'});if(r.ok){const j=await r.json();CAPS.ai=!!j.configured}}catch(e){}
+  try{const r=await fetch(FN+'musica?ping=1',{cache:'no-store'});if(r.ok){const j=await r.json();CAPS.yt=!!j.configured}}catch(e){}}
+
 /* ---- bots ---- */
 function botSay(bot,code,ch,text,local,extra){const s=DATA.servers[code];if(!s)return;const t=Date.now();const m={id:uid(14),ch,author:bot,text,ts:t,v:t,reactions:{},...(extra||{})};
   s.msgs[ch]??={};s.msgs[ch][m.id]=m;if(!local)broadcast(code,'msg',m);save();if(V.srv===code&&V.ch===ch)renderMsgs(nearBottom());return m}
@@ -807,14 +813,23 @@ function musicPos(M){return M.playing?(Date.now()-M.t0)/1000:(M.pos||0)}
 function musicSet(code,M){const s=DATA.servers[code];M.v=Math.max(Date.now(),(s.music?.v||0)+1);if(M.i>25){M.q=M.q.slice(M.i-5);M.i=5}s.music=M;broadcast(code,'music',M);save();
   if(code===UI.listenSrv)musicApply();if(UI.panel==='music')renderPanel();renderTop();renderVBar();renderMusicBar()}
 async function ytTitle(vid){try{const r=await fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v='+vid);const j=await r.json();return j.title||null}catch(e){return null}}
-async function musicAdd(link,code=V.srv,ch=V.ch){const vid=ytId(link);
-  if(!vid){botSay('bot:dj',code,ch,`Não achei um link do YouTube aí. 😅 Procure a música no YouTube, copie o link e mande \`/tocar link\`.\nAtalho para buscar: https://www.youtube.com/results?search_query=${encodeURIComponent(link)}`,true);return}
+async function musicFind(text){const sp=/open\.spotify\.com\//.test(text);
+  const r=await fetch(FN+'musica?'+(sp?'spotify='+encodeURIComponent(text):'q='+encodeURIComponent(text)));const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.results?.length)throw Object.assign(new Error(j.error||'Não achei essa música'),{status:r.status,query:j.query});return j}
+async function musicAdd(link,code=V.srv,ch=V.ch){let vid=ytId(link),found=null;
+  if(!vid){const sp=/open\.spotify\.com\//.test(link);
+    if(sp&&!/\/track\//.test(link)){botSay('bot:dj',code,ch,'Por enquanto eu toco **músicas** do Spotify (links de faixa). Playlists e álbuns ainda não. 🙏',true);return}
+    const wait=botSay('bot:dj',code,ch,`🔎 Procurando ${sp?'a música do Spotify':'**'+link.slice(0,80)+'**'}…`,true);
+    try{const j=await musicFind(link);found=j.results[0];vid=found.vid;if(wait){delete DATA.servers[code].msgs[ch][wait.id];renderMsgs(nearBottom())}}
+    catch(e){if(wait){delete DATA.servers[code].msgs[ch][wait.id]}
+      botSay('bot:dj',code,ch,e.status===503||e.status===404&&!CAPS.yt||!/^https?:$/.test(location.protocol)?`Ainda não consigo procurar músicas pelo nome. 😅 Cole o link do YouTube: \`/tocar link\`.\nAtalho para buscar: https://www.youtube.com/results?search_query=${encodeURIComponent(e.query||link)}`:`${e.message} 😕`,true);return}}
   if(UI.listenSrv!==code)musicListen(code,true);
   const s=DATA.servers[code];const M=structuredClone(s.music||{q:[],i:0,playing:false,t0:0,pos:0});const item={id:uid(8),vid,title:'Carregando título…',by:ME.id};
+  if(found)item.title=found.title;
   M.q.push(item);const idle=!M.playing||M.i>=M.q.length-1&&!M.q[M.i]||M.i>=M.q.length-1&&!M.playing;
   if(!M.playing&&(M.i>=M.q.length-1||!M.q[M.i]||M._done)){M.i=M.q.length-1;M.playing=true;M.t0=Date.now();M.pos=0;delete M._done}
   musicSet(code,M);
-  const title=await ytTitle(vid);const M2=structuredClone(s.music);const it=M2.q.find(x=>x.id===item.id);if(it){it.title=title||'Música do YouTube';musicSet(code,M2)}
+  const title=found?found.title:await ytTitle(vid);const M2=structuredClone(s.music);const it=M2.q.find(x=>x.id===item.id);if(it){it.title=title||'Música do YouTube';musicSet(code,M2)}
   const now=s.music.q[s.music.i]?.id===item.id;botSay('bot:dj',code,ch,now?`▶️ Tocando agora: **${title||'música do YouTube'}** (pedida por @${nameOf(ME.id).split(' ')[0]})`:`➕ Na fila: **${title||'música do YouTube'}** — posição ${s.music.q.length-s.music.i-1}`)}
 function musicSkip(code=V.srv,from){const s=DATA.servers[code];if(!s?.music)return;const M=structuredClone(s.music);if(from!=null&&M.i!==from)return;
   M.i++;if(M.i<M.q.length){M.playing=true;M.t0=Date.now();M.pos=0}else{M.playing=false;M.pos=0;M._done=true}musicSet(code,M)}
@@ -824,7 +839,7 @@ function musicStop(code=V.srv){musicSet(code,{q:[],i:0,playing:false,t0:0,pos:0}
 function musicRemove(id,code=V.srv){const s=DATA.servers[code];const M=structuredClone(s.music);const k=M.q.findIndex(x=>x.id===id);if(k<0)return;if(k===M.i){musicSkip(code);return}M.q.splice(k,1);if(k<M.i)M.i--;musicSet(code,M)}
 function musicSeek(sec,code=V.srv){const s=DATA.servers[code];if(!s?.music?.q[s.music.i])return;const M=structuredClone(s.music);if(M.playing)M.t0=Date.now()-sec*1000;else M.pos=sec;musicSet(code,M)}
 function musicCommand(text){const[cmd,...rest]=text.slice(1).split(/\s+/);const arg=rest.join(' ');const c=cmd.toLowerCase();const M=mus();
-  if(['tocar','play','p','musica','música'].includes(c)){if(!arg){if(!M.playing&&M.q[M.i]){musicResume();return}botSay('bot:dj',V.srv,V.ch,'Mande assim: `/tocar https://youtu.be/...`',true);return}musicAdd(arg);return}
+  if(['tocar','play','p','musica','música'].includes(c)){if(!arg){if(!M.playing&&M.q[M.i]){musicResume();return}botSay('bot:dj',V.srv,V.ch,'Mande assim: `/tocar nome da música` ou um link do YouTube ou Spotify',true);return}musicAdd(arg);return}
   if(['pular','skip'].includes(c)){if(!M.q[M.i]){botSay('bot:dj',V.srv,V.ch,'Não tem nada tocando. 🎶',true);return}musicSkip();botSay('bot:dj',V.srv,V.ch,`⏭️ ${nameOf(ME.id)} pulou a música.`);return}
   if(['pausar','pause'].includes(c)){musicPause();botSay('bot:dj',V.srv,V.ch,'⏸️ Música pausada.');return}
   if(['continuar','resume'].includes(c)){musicResume();botSay('bot:dj',V.srv,V.ch,'▶️ Voltando a tocar.');return}
@@ -853,7 +868,7 @@ function musicPanelHTML(){const M=mus();const cur=M.q[M.i];const listening=UI.li
    :`<div class="empty" style="padding:26px 10px"><div style="font-size:44px">🎧</div><b style="color:var(--tx);font-family:var(--disp);font-size:17px">Nada tocando</b><br>Cole um link do YouTube aqui embaixo ou digite <code>/tocar link</code> no chat.</div>`}
    <div class="lis ${listening?'on':''}"><div><b>${listening?'🔊 Você está ouvindo':'🔇 Você não está ouvindo'}</b><small>${listening?'A música toca no seu aparelho junto com todo mundo.':'Toque para ouvir junto com o servidor.'}</small></div><button class="btn ${listening?'s':''}" data-mus="${listening?'mute':'listen'}">${listening?'Parar de ouvir':'Ouvir'}</button></div>
    ${listening?`<label class="mlab">Volume da música</label><input type="range" id="mvol" min="0" max="100" value="${ls.get('musvol',60)}" style="width:100%;accent-color:var(--ac)">`:''}
-   <form id="madd" class="copyrow" style="margin-top:14px"><input id="mlink" placeholder="Link do YouTube" style="background:var(--bg0);border:1px solid var(--line);border-radius:12px;padding:11px;outline:none;min-width:0"><button class="btn">Adicionar</button></form>
+   <form id="madd" class="copyrow" style="margin-top:14px"><input id="mlink" placeholder="Nome da música ou link (YouTube/Spotify)" style="background:var(--bg0);border:1px solid var(--line);border-radius:12px;padding:11px;outline:none;min-width:0"><button class="btn">Adicionar</button></form>
    <div class="mlab" style="margin-top:16px">Próximas ${up.length?`(${up.length})`:''}</div>
    ${up.length?up.map(x=>`<div class="qi"><img src="https://i.ytimg.com/vi/${esc(x.vid)}/default.jpg" alt=""><div><b>${esc(x.title)}</b><small>${esc(nameOf(x.by))}</small></div><button class="ib" data-mrm="${esc(x.id)}" title="Tirar da fila">✕</button></div>`).join(''):'<div class="empty" style="padding:8px">A fila está vazia.</div>'}
   </div>`}
@@ -866,19 +881,22 @@ function renderMusicBar(){const b=$('#mbarside');if(!b)return;const s=DATA.serve
 /* ---- IA ---- */
 const isAIQuestion=t=>/^(@ia\b|\/ia\b)/i.test((t||'').trim());
 function aiResponder(code){const s=DATA.servers[code];const on=onlineUsers(code);const cands=[...on].filter(u=>s.members[u]?.ai);if(profile().ai)cands.push(ME.id);return cands.sort()[0]||null}
-function aiTrigger(code,m){if(ls.get('ai-key','')){askAI(code,m);return}if(!aiResponder(code))toast('A IA está desligada. Alguém precisa colocar uma chave em Configurações → IA.')}
-function maybeAnswerAI(code,m){if(!isAIQuestion(m.text)||isBot(m.author))return;if(!profile().ai)return;
+function aiTrigger(code,m){if(CAPS.ai||ls.get('ai-key','')){askAI(code,m);return}if(!aiResponder(code))toast('A IA está desligada. Alguém precisa colocar uma chave em Configurações → IA.')}
+function maybeAnswerAI(code,m){if(!isAIQuestion(m.text)||isBot(m.author)||CAPS.ai)return;if(!profile().ai)return;
   const authorHasAI=DATA.servers[code]?.members[m.author]?.ai;if(authorHasAI)return;if(aiResponder(code)!==ME.id)return;askAI(code,m)}
-async function askAI(code,m){const key=ls.get('ai-key','');if(!key)return;const s=DATA.servers[code];
+async function askAI(code,m){const key=ls.get('ai-key','');if(!key&&!CAPS.ai)return;const s=DATA.servers[code];
   const q=m.text.replace(/^(@ia|\/ia)\s*/i,'').trim();if(!q){botSay('bot:ia',code,m.ch,'Oi! Me pergunte algo assim: `@IA qual a capital da Austrália?`');return}
   broadcast(code,'typing',{u:'bot:ia',ch:m.ch});if(V.srv===code&&V.ch===m.ch){UI.typing['bot:ia']=Date.now();renderTyping()}
   const recent=Object.values(s.msgs[m.ch]||{}).filter(x=>!x.deleted&&x.text&&x.id!==m.id).sort((a,b)=>a.ts-b.ts).slice(-12).map(x=>`${nameOf(x.author)}: ${x.text.slice(0,400)}`).join('\n');
   const sys=`Você é a "Nexo IA", assistente dentro do Nexo, um app de chat onde um grupo de amigos adolescentes conversa e joga. Responda em português do Brasil, de forma amigável, divertida e curta (no máximo uns 120 palavras, a não ser que peçam mais). Use markdown simples (**negrito**, listas). Mantenha tudo adequado para adolescentes. O servidor se chama "${s.meta.name}" e o canal "#${s.channels[m.ch]?.name||''}".`;
   const user=`${recent?`Conversa recente do canal:\n${recent}\n\n`:''}${nameOf(m.author)} perguntou: ${q}`;
-  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+  try{let text;
+    if(CAPS.ai){const r=await fetch(FN+'ia',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:recent,user:nameOf(m.author),uid:m.author,server:s.meta.name,channel:s.channels[m.ch]?.name||''})});
+      const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'erro '+r.status);text=j.text}
+    else{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:ls.get('ai-model','claude-haiku-5-5'),max_tokens:700,system:sys,messages:[{role:'user',content:user}]})});
     const j=await r.json();if(!r.ok)throw new Error(j?.error?.message||('erro '+r.status));
-    const text=(j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n').trim()||'…';
+    text=(j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n').trim()||'…'}
     delete UI.typing['bot:ia'];renderTyping();botSay('bot:ia',code,m.ch,text.slice(0,3900),false,{replyTo:{id:m.id,author:m.author,text:(m.text||'').slice(0,100)}})}
   catch(e){delete UI.typing['bot:ia'];renderTyping();toast('A IA não respondeu: '+String(e.message||e).slice(0,120))}}
 
@@ -1228,6 +1246,7 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
    <label>Notificações</label>${np==='granted'?'<p class="sub">✅ Ativadas neste aparelho</p>':np==='unsupported'?'<p class="sub">Seu navegador não suporta.</p>':`<button type="button" class="btn s" id="np">${ico('bell')} Ativar notificações</button>`}
    ${chk('sf','sfx-on','Sons de mensagem e chamada')}${chk('nt','notif','Mostrar notificação quando o Nexo estiver em segundo plano')}`;
   if(setTab==='ia')body=`
+   ${CAPS.ai?'<div class="opt on" style="cursor:default;margin-top:12px"><div style="font-size:22px">✨</div><div><b>A IA já está ligada para todo mundo</b><small>Ninguém precisa configurar nada. É só escrever @IA e a pergunta no chat.</small></div></div>':''}
    <p class="sub" style="margin-top:12px">A <b>Nexo IA</b> responde no chat quando alguém escreve <code>@IA</code> e uma pergunta. Ela usa a IA Claude, que precisa de uma <b>chave de API</b> da Anthropic (console.anthropic.com). O uso da chave é cobrado por quem é dono dela.</p>
    <label>Chave de API</label><input id="aik" type="password" placeholder="sk-ant-…" value="${esc(ls.get('ai-key',''))}" autocomplete="off">
    <p class="sub" style="font-size:12.5px;margin:6px 0 0">A chave fica só neste aparelho e nunca é enviada para os seus amigos.</p>
@@ -1377,7 +1396,7 @@ document.addEventListener('paste',async e=>{const f=[...(e.clipboardData?.files|
 $('#msgs').addEventListener('keydown',e=>{const b=e.target.closest('[data-editbox]');if(!b)return;
   if(e.key==='Escape'){UI.editing=null;renderMsgs(false)}
   else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const id=b.dataset.editbox,txt=b.value.trim();UI.editing=null;const m=getMsg(id);if(txt&&m&&txt!==m.text)updateMsg(id,{text:txt,edited:true});else renderMsgs(false)}});
-$('#hint').innerHTML='<b>/ajuda</b> mostra os comandos · <b>/tocar</b> link do YouTube · <b>@IA</b> pergunta para a IA';
+$('#hint').innerHTML='<b>/ajuda</b> mostra os comandos · <b>/tocar</b> nome da música · <b>@IA</b> pergunta para a IA';
 addEventListener('hashchange',()=>{const m=location.hash.match(/entrar=([a-z0-9]+)/i);if(m&&ME){joinServer(m[1]);history.replaceState(null,'',location.pathname)}});
 addEventListener('beforeunload',()=>{if(CALL)broadcast(CALL.srv,'vstate',{u:ME.id,ch:null})});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(V.ch||V.dm)markRead()}});
@@ -1410,7 +1429,7 @@ async function start(){
   renderAll();renderMsgs(true);
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   banner(location.protocol==='file:'?$('#banner').textContent:'Conectando…');
-  await loadNet();
+  await loadNet();loadCaps();
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   for(const code in DATA.servers)connect(code);
   if(UI.listenSrv&&!DATA.servers[UI.listenSrv]){UI.listenSrv=null;ls.set('listen',null)}renderMusicBar();
