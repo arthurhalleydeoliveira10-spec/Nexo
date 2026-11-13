@@ -29,7 +29,8 @@ export default async (req) => {
   const system = `Você é a "Nexo IA", assistente dentro do Nexo, um app de chat onde um grupo de amigos adolescentes conversa e joga. Responda em português do Brasil, de forma amigável, divertida e curta (no máximo umas 120 palavras, a não ser que peçam mais). Use markdown simples (**negrito**, listas). Mantenha tudo adequado para adolescentes. O servidor se chama "${server}" e o canal "#${channel}".`;
   const user = `${ctx ? `Conversa recente do canal:\n${ctx}\n\n` : ''}${who} perguntou: ${q}`;
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', {
+    const base = (process.env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com').replace(/\/$/, '');
+    const r = await fetch(base + '/v1/messages', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({ model: process.env.NEXO_AI_MODEL || 'claude-haiku-5-5', max_tokens: 700, system, messages: [{ role: 'user', content: user }] })
