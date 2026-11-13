@@ -17,7 +17,7 @@ async function spotifyName(url) {
 }
 
 export default async (req) => {
-  const key = process.env.YOUTUBE_API_KEY;
+  const key = (process.env.YOUTUBE_API_KEY || '').trim().replace(/^["']|["']$/g, '');
   const u = new URL(req.url);
   if (u.searchParams.has('ping')) return json({ ok: true, configured: !!key });
   let q = (u.searchParams.get('q') || '').slice(0, 200).trim();
