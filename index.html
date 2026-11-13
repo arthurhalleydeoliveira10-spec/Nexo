@@ -904,7 +904,7 @@ async function askAI(code,m){const key=ls.get('ai-key','');if(!key&&!CAPS.ai)ret
   const sys=`Você é a "Nexo IA", assistente dentro do Nexo, um app de chat onde um grupo de amigos adolescentes conversa e joga. Responda em português do Brasil, de forma amigável, divertida e curta (no máximo uns 120 palavras, a não ser que peçam mais). Use markdown simples (**negrito**, listas). Mantenha tudo adequado para adolescentes. O servidor se chama "${s.meta.name}" e o canal "#${s.channels[m.ch]?.name||''}".`;
   const user=`${recent?`Conversa recente do canal:\n${recent}\n\n`:''}${nameOf(m.author)} perguntou: ${q}`;
   try{let text;
-    if(CAPS.ai){const r=await fetch(FN+'ia',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:recent,user:nameOf(m.author),uid:m.author,server:s.meta.name,channel:s.channels[m.ch]?.name||''})});
+    if(CAPS.ai){const r=await fetch(FN+'ia',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({question:q,context:recent,user:nameOf(m.author),uid:m.author,server:s.meta.name,channel:s.channels[m.ch]?.name||'',tz:Intl.DateTimeFormat().resolvedOptions().timeZone})});
       const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||'erro '+r.status);text=j.text}
     else{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
       body:JSON.stringify({model:ls.get('ai-model','claude-haiku-5-5'),max_tokens:700,system:sys,messages:[{role:'user',content:user}]})});
