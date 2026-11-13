@@ -132,7 +132,8 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .daysep::before,.daysep::after{content:"";flex:1;height:1px;background:var(--bg4)}
 .m{display:flex;gap:14px;padding:3px 22px;position:relative}
 .m.first{margin-top:14px}
-.m:hover{background:rgba(255,255,255,.025)}
+.m:hover{background:rgba(255,255,255,.03)}
+.m.first .a{letter-spacing:-.005em}
 .m.mention{background:var(--mention);box-shadow:inset 3px 0 0 var(--yel)}
 .m.flash{animation:fl 1.6s}
 @keyframes fl{0%,40%{background:var(--acs)}}
@@ -338,6 +339,40 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .pptb{display:flex;gap:8px;margin:4px 0 8px}.pptb button{flex:1;font-size:34px;padding:10px;border-radius:14px;background:var(--bg3);transition:transform .1s}.pptb button:hover{background:var(--bg4);transform:translateY(-2px)}
 .pptl{display:flex;justify-content:space-between;align-items:center;background:var(--bg0);border-radius:12px;padding:8px 14px;margin-bottom:8px}.pptl span{font-size:32px}.pptl small{color:var(--tx2);text-align:center}
 .gs{font-size:14px;color:var(--tx2);font-weight:600;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.av.bot{border-radius:30%;font-size:18px}
+.bottag{background:var(--vi);color:#fff;font-size:9.5px;font-weight:800;padding:2px 5px;border-radius:5px;letter-spacing:.03em;align-self:center}
+#ytwrap{position:fixed;left:-10000px;top:0;width:320px;height:180px;pointer-events:none}
+#mbarside{display:none;margin:0 10px 8px;padding:8px;border-radius:14px;background:var(--bg2);gap:8px;align-items:center;border:1px solid var(--line)}
+#mbarside.on{display:flex}#mbarside img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+#mbarside .mi{flex:1;min-width:0;cursor:pointer}#mbarside .mi b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#mbarside .mi small{font-size:11.5px;color:var(--tx3)}
+#mbarside .ib{width:30px;height:30px}
+.mus{padding:6px 16px 20px}
+.np{position:relative;border-radius:18px;overflow:hidden;padding:16px;display:flex;flex-direction:column;gap:12px;isolation:isolate}
+.np::before{content:"";position:absolute;inset:-20px;background:var(--th) center/cover;filter:blur(24px) saturate(1.4);opacity:.55;z-index:-1}
+.np::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent,rgba(12,10,24,.85));z-index:-1}
+.np img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+.npi small{color:var(--tx2);font-size:12px}.npi b{display:block;font-family:var(--disp);font-size:18px;line-height:1.2;margin:2px 0}.npi span{font-size:12.5px;color:var(--tx2)}
+.mbar{height:5px;background:var(--bg4);border-radius:3px;margin-top:14px;overflow:hidden}#mprog{height:100%;width:0;background:var(--grad);transition:width 2.4s linear}
+.mt{font-size:11.5px;color:var(--tx3);text-align:right;margin-top:4px;min-height:14px}
+.mctl{display:flex;justify-content:center;align-items:center;gap:12px;margin:6px 0 4px}.mctl .cb{border-radius:50%}
+.lis{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--bg3);border-radius:14px;padding:12px;margin-top:14px}.lis.on{background:var(--acs)}.lis b{display:block;font-size:14px}.lis small{font-size:12px;color:var(--tx2)}
+.mlab{font-size:13px;font-weight:600;color:var(--tx2);margin:14px 0 6px;display:block}
+.qi{display:flex;gap:10px;align-items:center;padding:6px;border-radius:10px}.qi:hover{background:var(--bg3)}.qi img{width:56px;height:42px;border-radius:8px;object-fit:cover}.qi div{flex:1;min-width:0}.qi b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.qi small{font-size:11.5px;color:var(--tx3)}
+.game.uno{max-width:560px}
+.uc{width:46px;height:68px;border-radius:10px;display:grid;place-items:center;font-family:var(--disp);font-weight:800;font-size:19px;color:#fff;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,.35);position:relative;overflow:hidden;flex-shrink:0;transition:transform .12s}
+.uc span{position:relative;text-shadow:0 2px 0 rgba(0,0,0,.3)}
+.uc::before{content:"";position:absolute;inset:6px 4px;border-radius:50%/40%;background:rgba(255,255,255,.18);transform:rotate(-25deg)}
+.uc.c-r{background:#ef3b4f}.uc.c-g{background:#1fb96b}.uc.c-b{background:#2f7cf6}.uc.c-y{background:#f2b52b}.uc.c-w{background:conic-gradient(#ef3b4f 0 25%,#f2b52b 0 50%,#1fb96b 0 75%,#2f7cf6 0)}
+.uc[disabled]{cursor:default}.uhand .uc[disabled]{opacity:.5}
+.uc.ok{cursor:pointer}.uc.ok:hover{transform:translateY(-8px)}
+.uc.big{width:66px;height:96px;font-size:28px}
+.utable{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:radial-gradient(circle at 30% 40%,#1d4d3a,#10261d);border-radius:16px;padding:14px;margin-bottom:10px}
+.upile{position:relative}.ucolor{position:absolute;right:-8px;bottom:-8px;width:22px;height:22px;border-radius:50%;border:3px solid #fff}
+.ucolor.c-r{background:#ef3b4f}.ucolor.c-g{background:#1fb96b}.ucolor.c-b{background:#2f7cf6}.ucolor.c-y{background:#f2b52b}
+.ulast{flex:1;min-width:140px;font-size:13px;color:#d6f5e6}
+.uhand{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 10px}
+.unot{color:var(--yel);font-style:normal;font-weight:800;font-size:11px}
+.unocol{display:flex;gap:8px;margin-top:8px}.unocol button{width:44px;height:44px;border-radius:12px}.unocol .c-r{background:#ef3b4f}.unocol .c-y{background:#f2b52b}.unocol .c-g{background:#1fb96b}.unocol .c-b{background:#2f7cf6}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:900px){
   #mem{position:fixed;right:0;top:var(--sat);bottom:0;z-index:30;box-shadow:-10px 0 40px rgba(0,0,0,.5)}
@@ -368,6 +403,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
   <aside id="side">
     <div id="sideHead"><span id="sname">Nexo</span><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></div>
     <div id="chans"></div>
+    <div id="mbarside"></div>
     <div id="vbar"></div>
     <div id="me"></div>
   </aside>
@@ -381,6 +417,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
       <button class="ib" id="callBtn" title="Iniciar chamada de voz"><svg class="i" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></button>
       <button class="ib" id="vidBtn" title="Iniciar chamada de vídeo"><svg class="i" viewBox="0 0 24 24"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
       <input id="search" placeholder="Buscar mensagens">
+      <button class="ib" id="musicBtn" title="Música do servidor"><svg class="i" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>
       <button class="ib" id="pinsBtn" title="Mensagens fixadas"><svg class="i" viewBox="0 0 24 24"><path d="M12 17v5M9 10.8V4h6v6.8l3 3.2v2H6v-2z"/></svg></button>
       <button class="ib" id="inviteBtn" title="Convidar amigos"><svg class="i" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg></button>
       <button class="ib" id="memBtn" title="Membros"><svg class="i" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></button>
@@ -419,6 +456,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 <div id="toast"></div>
 <div id="zoom"><img id="zoomImg" alt=""></div>
 <div id="audios" hidden></div>
+<div id="ytwrap" aria-hidden="true"><div id="ytbox"></div></div>
 
 <script type="module">
 /* =====================================================================
@@ -494,8 +532,10 @@ let saveT=null;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{
 
 const srv=()=>DATA.servers[V.srv];
 const chan=()=>srv()?.channels[V.ch];
-const profile=()=>({id:ME.id,name:ME.name,color:ME.color,about:ME.about||'',status:ME.status||'online',avatar:ME.avatar||'',v:ME.v||1});
-function member(u){if(u===ME.id)return profile();for(const s of Object.values(DATA.servers))if(s.members[u])return s.members[u];return null}
+const profile=()=>({id:ME.id,name:ME.name,color:ME.color,about:ME.about||'',status:ME.status||'online',avatar:ME.avatar||'',ai:!!(ls.get('ai-key','')&&ls.get('ai-share',true)),v:ME.v||1});
+const BOTS={'bot:ia':{id:'bot:ia',name:'Nexo IA',color:'#8b5cff',emoji:'✨',about:'Sou a IA do Nexo. Me chame com @IA seguido da sua pergunta.'},'bot:dj':{id:'bot:dj',name:'DJ Nexo',color:'#ff4f9a',emoji:'🎧',about:'Toco música para o servidor inteiro. Use /tocar e um link do YouTube.'}};
+const isBot=u=>String(u).startsWith('bot:');
+function member(u){if(BOTS[u])return BOTS[u];if(u===ME.id)return profile();for(const s of Object.values(DATA.servers))if(s.members[u])return s.members[u];return null}
 const nameOf=u=>member(u)?.name||'Alguém';
 const colorOf=u=>member(u)?.color||colorFor(u);
 function onlineUsers(code){const r=ROOMS[code];return new Set(r?Object.values(r.peers):[])}
@@ -503,6 +543,7 @@ function isOnline(u){if(u===ME.id)return true;return Object.values(ROOMS).some(r
 function statusOf(u){const m=member(u);if(u===ME.id)return ME.status==='invisivel'?'offline':(ME.status||'online');
   if(!isOnline(u)||!m||m.status==='invisivel')return 'offline';return m.status||'online'}
 function avatar(u,size,st,cls=''){const m=member(u);const n=m?.name||'?';
+  if(m?.emoji)return `<div class="av bot ${cls}" data-user="${esc(u)}" style="background:${m.color};${size?`width:${size}px;height:${size}px;font-size:${Math.round(size*.5)}px`:''}">${m.emoji}</div>`;
   const bg=m?.avatar?`background-image:url(${m.avatar});`:`background-color:${colorOf(u)};`;
   return `<div class="av ${cls}" data-av="${esc(u)}" style="${bg}${size?`width:${size}px;height:${size}px;font-size:${Math.round(size*.4)}px`:''}" data-user="${esc(u)}">${m?.avatar?'':esc((n[0]||'?').toUpperCase())}${st?`<span class="st ${statusOf(u)}"></span>`:''}</div>`}
 
@@ -511,7 +552,7 @@ async function loadNet(){
   try{const mod=await import('https://esm.run/trystero@0.21.6');joinRoomFn=mod.joinRoom;netOK=true;banner('')}
   catch(e){console.error(e);banner('Não consegui carregar a conexão. Verifique sua internet e recarregue a página.',true)}}
 function banner(t,red){const b=$('#banner');b.textContent=t;b.classList.toggle('on',!!t);b.classList.toggle('red',!!red)}
-const ACTIONS=['hello','sync','msg','chan','meta','typing','vstate','dm','react','bye','game'];
+const ACTIONS=['hello','sync','msg','chan','meta','typing','vstate','dm','react','bye','game','music'];
 function connect(code){if(!joinRoomFn||ROOMS[code])return;
   const room=joinRoomFn({appId:APP_ID,password:'nx-'+code,turnConfig:TURN},'srv-'+code,err=>{console.warn(err);toast('Problema ao conectar ao servidor')});
   const A={};const R={room,A,peers:{}};ROOMS[code]=R;
@@ -528,7 +569,7 @@ function broadcast(code,n,d,target){const R=ROOMS[code];if(R)R.A[n](d,target??nu
 function syncPayload(code){const s=DATA.servers[code];const msgs={};
   for(const ch in s.msgs){msgs[ch]=Object.values(s.msgs[ch]).sort((a,b)=>b.ts-a.ts).slice(0,120)}
   const games=Object.values(s.games||{}).sort((a,b)=>b.ts-a.ts).slice(0,40);
-  return{meta:s.meta,channels:s.channels,msgs,games,members:Object.fromEntries(Object.entries(s.members).filter(([k])=>k!==ME.id))}}
+  return{meta:s.meta,channels:s.channels,msgs,games,music:s.music||null,members:Object.fromEntries(Object.entries(s.members).filter(([k])=>k!==ME.id))}}
 
 function mergeMsg(s,m){if(!m||!m.id||!m.ch)return false;s.msgs[m.ch]??={};const cur=s.msgs[m.ch][m.id];
   if(!cur){s.msgs[m.ch][m.id]=m;return 'new'}
@@ -542,6 +583,7 @@ function acceptMeta(s,d,from){if(!d||(d.v||0)<=(s.meta.v||0))return false;
 function mergeServerState(code,d,from){const s=DATA.servers[code];let ch=false;
   if(d.meta&&acceptMeta(s,d.meta,from))ch=true;
   for(const g of d.games||[])if(mergeGame(s,g))ch=true;
+  if(d.music&&(d.music.v||0)>(s.music?.v||0)){s.music=d.music;ch=true;if(code===UI.listenSrv)musicApply()}
   for(const id in d.channels||{}){const c=d.channels[id];if(!s.channels[id]||(c.v||0)>(s.channels[id].v||0)){s.channels[id]=c;ch=true}}
   for(const u in d.members||{}){if(u===ME.id||s.meta.kicked?.[u])continue;const m=d.members[u];if(!s.members[u]||(m.v||0)>(s.members[u].v||0)){s.members[u]=m;ch=true}}
   for(const c in d.msgs||{})for(const m of d.msgs[c]||[])if(mergeMsg(s,m))ch=true;
@@ -557,11 +599,12 @@ function handle(code,n,d,p){const s=DATA.servers[code];if(!s)return;const R=ROOM
     save();renderAll();break}
   case'sync':{if(mergeServerState(code,d,su)){save();if(checkKicked(code))return;if(V.srv===code){ensureCh();renderAll();renderMsgs(true);markRead()}else renderRail()}break}
   case'msg':{const r=mergeMsg(s,d);if(!r)return;save();
-    if(r==='new'&&d.author!==ME.id){d._new=true;notify(code,d)}
+    if(r==='new'&&d.author!==ME.id){d._new=true;notify(code,d);maybeAnswerAI(code,d)}
     if(V.srv===code&&V.ch===d.ch){const nb=nearBottom();renderMsgs(nb);markRead()}else renderSide(),renderRail();
     delete UI.typing[d.author];renderTyping();break}
   case'chan':{if(!d?.id)return;const c=s.channels[d.id];if(!c||(d.v||0)>(c.v||0)){s.channels[d.id]=d;save();if(V.srv===code){const had=V.ch;ensureCh();if(had!==V.ch)renderMsgs(true)}renderAll()}break}
   case'meta':{if(acceptMeta(s,d,su)){save();if(checkKicked(code))return;renderAll();if(V.srv===code)renderMsgs(nearBottom())}break}
+  case'music':{if((d?.v||0)>(s.music?.v||0)){s.music=d;save();if(code===UI.listenSrv)musicApply();if(V.srv===code&&UI.panel==='music')renderPanel();renderVBar();renderMusicBar()}break}
   case'game':{if(mergeGame(s,d)){save();if(V.srv===code&&V.ch===d.ch)renderMsgs(nearBottom())}break}
   case'typing':{if(V.srv!==code||d.ch!==V.ch)return;UI.typing[d.u]=Date.now();renderTyping();break}
   case'react':{const m=s.msgs[d.ch]?.[d.mid];if(!m)return;m.reactions??={};m.reactions[d.e]??={};const a=m.reactions[d.e][d.u];
@@ -631,14 +674,14 @@ function renderRail(){
   h+=`<button class="sv add" data-newsv title="Criar servidor">${ico('plus')}</button><button class="sv join" data-joinsv title="Entrar com convite">${ico('join')}</button>`;
   $('#rail').innerHTML=h}
 function renderSide(){const el=$('#chans');
-  if(!V.srv){$('#sname').textContent='Mensagens diretas';
+  if(!V.srv){$('#sname').textContent='Mensagens diretas';$('#sideHead').style.background='';
     const friends=new Map();for(const s of Object.values(DATA.servers))for(const u in s.members)if(u!==ME.id)friends.set(u,s.members[u]);
     const dms=Object.keys(DATA.dms).sort((a,b)=>lastTs(b)-lastTs(a));
     let h=`<div class="ch ${!V.dm?'on':''}" data-home>${ico('chat')}<span class="nm">Início</span></div><div class="cat"><span>Mensagens diretas</span><button data-newdm title="Nova conversa">${ico('plus')}</button></div>`;
     if(!dms.length)h+=`<div class="empty" style="padding:12px">Nenhuma conversa ainda. Toque em um amigo na lista de membros para conversar.</div>`;
     for(const u of dms){const n=dmUnread(u);h+=`<div class="ch ${V.dm===u?'on':''} ${n?'unread':''}" data-dm="${esc(u)}">${avatar(u,30,true)}<span class="nm">${esc(nameOf(u))}</span>${n?`<span class="cnt">${n}</span>`:''}</div>`}
     el.innerHTML=h;return}
-  const s=srv();$('#sname').textContent=s.meta.name;
+  const s=srv();$('#sname').textContent=s.meta.name;$('#sideHead').style.background=`linear-gradient(120deg,${s.meta.color||'#8b5cff'}38,transparent 70%)`;
   let h=`<div class="cat"><span>Canais de texto</span><button data-newch="text" title="Criar canal">${ico('plus')}</button></div>`;
   for(const c of sortedChans('text')){const n=c.id!==V.ch?unreadCount(s,c.id):0;
     h+=`<div class="ch ${c.id===V.ch?'on':''} ${n?'unread':''}" data-ch="${esc(c.id)}" style="position:relative">${ico('hash')}<span class="nm">${esc(c.name)}</span>${n?`<span class="cnt">${n>99?'99+':n}</span>`:''}<button class="x" data-chset="${esc(c.id)}" title="Editar canal">${ico('gear')}</button></div>`}
@@ -651,7 +694,7 @@ function lastTs(u){const b=DATA.dms[u];let t=0;for(const m of Object.values(b?.m
 function renderTop(){const vc=chan()?.type==='voice';
   $('#callBtn').style.display=V.dm?'':'none';$('#vidBtn').style.display=V.dm?'':'none';
   $('#inviteBtn').style.display=V.srv?'':'none';$('#pinsBtn').style.display=(V.ch&&!vc)||V.dm?'':'none';$('#search').style.display=(V.ch&&!vc)||V.dm?'':'none';
-  $('#memBtn').style.display=V.srv?'':'none';
+  $('#memBtn').style.display=V.srv?'':'none';$('#musicBtn').style.display=V.srv?'':'none';$('#musicBtn').classList.toggle('on',UI.panel==='music'||(UI.listenSrv===V.srv&&!!srv()?.music?.playing));
   if(V.dm){$('#ttl').innerHTML=`${avatar(V.dm,26,true)}<span>${esc(nameOf(V.dm))}</span>`;$('#topic').textContent=statusOf(V.dm)==='offline'?'Offline':STATUS[statusOf(V.dm)];$('#inp').placeholder='Conversar com @'+nameOf(V.dm)}
   else if(!V.srv){$('#ttl').innerHTML=`${ico('chat')}<span>Início</span>`;$('#topic').textContent=''}
   else if(!chan()){$('#ttl').textContent=srv().meta.name;$('#topic').textContent=''}
@@ -709,7 +752,7 @@ function msgHTML(m,first,compact){const mine=m.author===ME.id;
   const rs=reactList(m);const head=first||compact;
   return `<div class="m ${head?'first':''} ${mentionsMe(m)?'mention':''}" id="m-${esc(m.id)}">${tools}
     ${head?avatar(m.author):`<div class="gut">${fmtTime(m.ts)}</div>`}
-    <div class="c">${reply}${head?`<div class="h"><span class="a" data-user="${esc(m.author)}" style="color:${colorOf(m.author)}">${esc(nameOf(m.author))}</span><span class="tm">${fmtDay(m.ts)} às ${fmtTime(m.ts)}</span>${m.pinned?`<span style="color:var(--yel);font-size:11px">📌 fixada</span>`:''}</div>`:''}
+    <div class="c">${reply}${head?`<div class="h"><span class="a" data-user="${esc(m.author)}" style="color:${colorOf(m.author)}">${esc(nameOf(m.author))}</span>${isBot(m.author)?'<span class="bottag">BOT</span>':''}<span class="tm">${fmtDay(m.ts)} às ${fmtTime(m.ts)}</span>${m.pinned?`<span style="color:var(--yel);font-size:11px">📌 fixada</span>`:''}</div>`:''}
     ${body}${rs.length?`<div class="reacts">${rs.map(([e,us])=>`<button class="rc ${us.includes(ME.id)?'mine':''}" data-rq="${esc(m.id)}" data-e="${esc(e)}" title="${esc(us.map(nameOf).join(', '))}">${e} <span>${us.length}</span></button>`).join('')}<button class="rc" data-react="${esc(m.id)}" title="Adicionar reação">${ico('smile').replace('class="i"','class="i" style="width:15px;height:15px"')}</button></div>`:''}</div></div>`}
 function nearBottom(){const e=$('#msgs');return e.scrollHeight-e.scrollTop-e.clientHeight<150}
 function renderMsgs(stick=true){const e=$('#msgs');if(!V.dm&&(!V.srv||!V.ch||chan()?.type==='voice')){if(V.srv&&!V.ch)e.innerHTML=`<div class="welcome"><div class="big">${ico('hash')}</div><h2>Nenhum canal</h2><p>Crie um canal de texto com o ＋ na lateral.</p></div>`;renderPanel();return}
@@ -723,6 +766,7 @@ function renderMsgs(stick=true){const e=$('#msgs');if(!V.dm&&(!V.srv||!V.ch||cha
   const eb=e.querySelector('[data-editbox]');if(eb){eb.focus();eb.setSelectionRange(eb.value.length,eb.value.length)}
   renderPanel()}
 function renderPanel(){const p=$('#panel');p.classList.toggle('on',!!UI.panel);if(!UI.panel)return;
+  if(UI.panel==='music'){if(!srv()){UI.panel=null;p.classList.remove('on');return}$('#panelT').textContent='🎧 Música do servidor';$('#panelB').innerHTML=musicPanelHTML();bindMusicPanel();return}
   const ms=curMsgs();let list;
   if(UI.panel==='pins'){$('#panelT').textContent='📌 Mensagens fixadas';list=ms.filter(m=>m.pinned)}
   else{$('#panelT').textContent=`🔎 "${UI.query}"`;const q=UI.query.toLowerCase();list=ms.filter(m=>(m.text||'').toLowerCase().includes(q)||nameOf(m.author).toLowerCase().includes(q))}
@@ -734,11 +778,13 @@ setInterval(renderTyping,1500);
 /* ---- enviar ---- */
 async function send(){const inp=$('#inp');const text=inp.value.trim();if(!text&&!UI.img)return;if(text.length>4000){toast('Mensagem muito longa (máx. 4000 caracteres)');return}
   if(text==='/limpar'&&V.dm){DATA.dms[V.dm].msgs={};inp.value='';save();renderMsgs();return}
+  if(V.srv&&V.ch&&/^\/(tocar|play|p|pular|skip|pausar|pause|continuar|resume|parar|stop|fila|queue|musica|música)\b/i.test(text)){inp.value='';autoGrow();musicCommand(text);return}
+  if(V.srv&&V.ch&&/^\/ajuda\b/i.test(text)){inp.value='';autoGrow();botSay('bot:dj',V.srv,V.ch,'**Comandos do Nexo**\n🎧 `/tocar link-do-youtube` toca ou coloca na fila\n⏭️ `/pular`  ⏸️ `/pausar`  ▶️ `/continuar`  ⏹️ `/parar`  📜 `/fila`\n✨ `@IA sua pergunta` pergunta para a IA\n🎮 botão de controle ao lado do emoji para jogar',true);return}
   const m={id:uid(14),author:ME.id,text,ts:Date.now(),v:Date.now(),reactions:{}};if(UI.img)m.img=UI.img;
   const ms=curMsgs();if(UI.reply){const r=ms.find(x=>x.id===UI.reply);if(r)m.replyTo={id:r.id,author:r.author,text:(r.text||'').slice(0,100)}}
   inp.value='';autoGrow();UI.reply=null;UI.img=null;updReply();updPrev();lastTypingSent=0;
   if(V.dm){DATA.dms[V.dm].msgs[m.id]=m;const ok=sendDM(V.dm,m);if(!ok)toast(`${nameOf(V.dm)} está offline — a mensagem fica salva só aqui por enquanto.`)}
-  else{m.ch=V.ch;srv().msgs[V.ch]??={};srv().msgs[V.ch][m.id]=m;broadcast(V.srv,'msg',m)}
+  else{m.ch=V.ch;srv().msgs[V.ch]??={};srv().msgs[V.ch][m.id]=m;broadcast(V.srv,'msg',m);if(isAIQuestion(text))aiTrigger(V.srv,m)}
   save();renderMsgs(true);markRead();sfx('send')}
 let lastTypingSent=0;
 function typingPing(){if(!V.srv||!V.ch)return;const n=Date.now();if(n-lastTypingSent<3000)return;lastTypingSent=n;broadcast(V.srv,'typing',{u:ME.id,ch:V.ch})}
@@ -749,19 +795,142 @@ function deleteMsg(id){if(V.dm){delete DATA.dms[V.dm].msgs[id];sendDM(V.dm,{id,d
 function toggleReact(id,e){if(V.dm)return;const m=getMsg(id);if(!m)return;m.reactions??={};m.reactions[e]??={};const on=!m.reactions[e][ME.id]?.on;const t=Date.now();
   m.reactions[e][ME.id]={on,t};broadcast(V.srv,'react',{ch:V.ch,mid:id,e,u:ME.id,on,t});save();renderMsgs(false)}
 
+/* ---- bots ---- */
+function botSay(bot,code,ch,text,local,extra){const s=DATA.servers[code];if(!s)return;const t=Date.now();const m={id:uid(14),ch,author:bot,text,ts:t,v:t,reactions:{},...(extra||{})};
+  s.msgs[ch]??={};s.msgs[ch][m.id]=m;if(!local)broadcast(code,'msg',m);save();if(V.srv===code&&V.ch===ch)renderMsgs(nearBottom());return m}
+
+/* ---- música (DJ Nexo) ---- */
+UI.listenSrv=ls.get('listen',null);
+function ytId(t){t=String(t).trim();let m=t.match(/(?:youtu\.be\/|v=|shorts\/|embed\/|live\/)([\w-]{11})/);if(m)return m[1];if(/^[\w-]{11}$/.test(t))return t;return null}
+const mus=()=>srv()?.music||{q:[],i:0,playing:false,t0:0,pos:0,v:0};
+function musicPos(M){return M.playing?(Date.now()-M.t0)/1000:(M.pos||0)}
+function musicSet(code,M){const s=DATA.servers[code];M.v=Math.max(Date.now(),(s.music?.v||0)+1);if(M.i>25){M.q=M.q.slice(M.i-5);M.i=5}s.music=M;broadcast(code,'music',M);save();
+  if(code===UI.listenSrv)musicApply();if(UI.panel==='music')renderPanel();renderTop();renderVBar();renderMusicBar()}
+async function ytTitle(vid){try{const r=await fetch('https://noembed.com/embed?url=https://www.youtube.com/watch?v='+vid);const j=await r.json();return j.title||null}catch(e){return null}}
+async function musicAdd(link,code=V.srv,ch=V.ch){const vid=ytId(link);
+  if(!vid){botSay('bot:dj',code,ch,`Não achei um link do YouTube aí. 😅 Procure a música no YouTube, copie o link e mande \`/tocar link\`.\nAtalho para buscar: https://www.youtube.com/results?search_query=${encodeURIComponent(link)}`,true);return}
+  if(UI.listenSrv!==code)musicListen(code,true);
+  const s=DATA.servers[code];const M=structuredClone(s.music||{q:[],i:0,playing:false,t0:0,pos:0});const item={id:uid(8),vid,title:'Carregando título…',by:ME.id};
+  M.q.push(item);const idle=!M.playing||M.i>=M.q.length-1&&!M.q[M.i]||M.i>=M.q.length-1&&!M.playing;
+  if(!M.playing&&(M.i>=M.q.length-1||!M.q[M.i]||M._done)){M.i=M.q.length-1;M.playing=true;M.t0=Date.now();M.pos=0;delete M._done}
+  musicSet(code,M);
+  const title=await ytTitle(vid);const M2=structuredClone(s.music);const it=M2.q.find(x=>x.id===item.id);if(it){it.title=title||'Música do YouTube';musicSet(code,M2)}
+  const now=s.music.q[s.music.i]?.id===item.id;botSay('bot:dj',code,ch,now?`▶️ Tocando agora: **${title||'música do YouTube'}** (pedida por @${nameOf(ME.id).split(' ')[0]})`:`➕ Na fila: **${title||'música do YouTube'}** — posição ${s.music.q.length-s.music.i-1}`)}
+function musicSkip(code=V.srv,from){const s=DATA.servers[code];if(!s?.music)return;const M=structuredClone(s.music);if(from!=null&&M.i!==from)return;
+  M.i++;if(M.i<M.q.length){M.playing=true;M.t0=Date.now();M.pos=0}else{M.playing=false;M.pos=0;M._done=true}musicSet(code,M)}
+function musicPause(code=V.srv){const s=DATA.servers[code];if(!s?.music?.playing)return;const M=structuredClone(s.music);M.pos=musicPos(M);M.playing=false;musicSet(code,M)}
+function musicResume(code=V.srv){const s=DATA.servers[code];if(!s?.music||s.music.playing||!s.music.q[s.music.i])return;const M=structuredClone(s.music);M.t0=Date.now()-(M.pos||0)*1000;M.playing=true;musicSet(code,M)}
+function musicStop(code=V.srv){musicSet(code,{q:[],i:0,playing:false,t0:0,pos:0})}
+function musicRemove(id,code=V.srv){const s=DATA.servers[code];const M=structuredClone(s.music);const k=M.q.findIndex(x=>x.id===id);if(k<0)return;if(k===M.i){musicSkip(code);return}M.q.splice(k,1);if(k<M.i)M.i--;musicSet(code,M)}
+function musicSeek(sec,code=V.srv){const s=DATA.servers[code];if(!s?.music?.q[s.music.i])return;const M=structuredClone(s.music);if(M.playing)M.t0=Date.now()-sec*1000;else M.pos=sec;musicSet(code,M)}
+function musicCommand(text){const[cmd,...rest]=text.slice(1).split(/\s+/);const arg=rest.join(' ');const c=cmd.toLowerCase();const M=mus();
+  if(['tocar','play','p','musica','música'].includes(c)){if(!arg){if(!M.playing&&M.q[M.i]){musicResume();return}botSay('bot:dj',V.srv,V.ch,'Mande assim: `/tocar https://youtu.be/...`',true);return}musicAdd(arg);return}
+  if(['pular','skip'].includes(c)){if(!M.q[M.i]){botSay('bot:dj',V.srv,V.ch,'Não tem nada tocando. 🎶',true);return}musicSkip();botSay('bot:dj',V.srv,V.ch,`⏭️ ${nameOf(ME.id)} pulou a música.`);return}
+  if(['pausar','pause'].includes(c)){musicPause();botSay('bot:dj',V.srv,V.ch,'⏸️ Música pausada.');return}
+  if(['continuar','resume'].includes(c)){musicResume();botSay('bot:dj',V.srv,V.ch,'▶️ Voltando a tocar.');return}
+  if(['parar','stop'].includes(c)){musicStop();botSay('bot:dj',V.srv,V.ch,'⏹️ Música parada e fila limpa.');return}
+  if(['fila','queue'].includes(c)){const up=M.q.slice(M.i);botSay('bot:dj',V.srv,V.ch,up.length?'📜 **Fila**\n'+up.map((x,k)=>`${k?k+'.':'▶️'} ${x.title}`).join('\n'):'A fila está vazia. Use `/tocar link`.',true);return}}
+/* player do YouTube */
+let YT_P=null,ytReady=null,ytLoadedVid=null;
+function loadYT(){return ytReady??=new Promise(res=>{if(window.YT?.Player)return res();window.onYouTubeIframeAPIReady=()=>res();const sc=document.createElement('script');sc.src='https://www.youtube.com/iframe_api';document.head.appendChild(sc)}).then(()=>new Promise(res=>{
+  YT_P=new YT.Player('ytbox',{width:320,height:180,playerVars:{playsinline:1,controls:0,disablekb:1,rel:0},events:{onReady:()=>{YT_P.setVolume(ls.get('musvol',60));res()},onStateChange:e=>{
+    if(e.data===YT.PlayerState.ENDED){const s=DATA.servers[UI.listenSrv];if(s?.music)musicSkip(UI.listenSrv,s.music.i)}
+    if(e.data===YT.PlayerState.PLAYING)renderMusicBar()},onError:()=>{const s=DATA.servers[UI.listenSrv];if(s?.music){toast('Essa música não pode tocar fora do YouTube. Pulando…');musicSkip(UI.listenSrv,s.music.i)}}}})}))}
+function musicListen(code,on){if(on){UI.listenSrv=code;ls.set('listen',code);loadYT().then(musicApply)}else{UI.listenSrv=null;ls.set('listen',null);try{YT_P?.pauseVideo()}catch(e){}ytLoadedVid=null}renderTop();renderMusicBar();if(UI.panel==='music')renderPanel()}
+function musicApply(){if(!YT_P?.loadVideoById||!UI.listenSrv)return;const M=DATA.servers[UI.listenSrv]?.music;const cur=M?.q?.[M.i];
+  if(!cur||!M.playing){try{if(cur&&ytLoadedVid===cur.vid)YT_P.pauseVideo();else if(!cur){YT_P.stopVideo();ytLoadedVid=null}}catch(e){}renderMusicBar();return}
+  const pos=Math.max(0,musicPos(M));
+  if(ytLoadedVid!==cur.vid){ytLoadedVid=cur.vid;YT_P.loadVideoById({videoId:cur.vid,startSeconds:pos})}
+  else{const t=YT_P.getCurrentTime?.()||0;if(Math.abs(t-pos)>2.5)YT_P.seekTo(pos,true);if(YT_P.getPlayerState?.()!==1)YT_P.playVideo()}
+  renderMusicBar()}
+setInterval(()=>{if(UI.listenSrv&&YT_P)musicApply();if(UI.panel==='music'){const el=$('#mprog');const M=mus();const d=YT_P?.getDuration?.()||0;if(el&&d){const p=Math.min(100,musicPos(M)/d*100);el.style.width=p+'%';const tt=$('#mtime');if(tt)tt.textContent=fmtSec(musicPos(M))+' / '+fmtSec(d)}}},2500);
+const fmtSec=x=>{x=Math.max(0,Math.floor(x));return Math.floor(x/60)+':'+String(x%60).padStart(2,'0')};
+function musicPanelHTML(){const M=mus();const cur=M.q[M.i];const listening=UI.listenSrv===V.srv;const up=M.q.slice(M.i+1);
+  return `<div class="mus">
+   ${cur?`<div class="np" style="--th:url(https://i.ytimg.com/vi/${esc(cur.vid)}/hqdefault.jpg)"><img src="https://i.ytimg.com/vi/${esc(cur.vid)}/mqdefault.jpg" alt=""><div class="npi"><small>${M.playing?'Tocando agora':'Pausado'}</small><b>${esc(cur.title)}</b><span>pedida por ${esc(nameOf(cur.by))}</span></div></div>
+   <div class="mbar"><div id="mprog"></div></div><div class="mt" id="mtime"></div>
+   <div class="mctl"><button class="cb" data-mus="prev" title="Voltar ao início">⏮</button><button class="cb on" data-mus="${M.playing?'pause':'play'}" title="${M.playing?'Pausar':'Tocar'}" style="width:60px;height:60px;font-size:22px">${M.playing?'⏸':'▶'}</button><button class="cb" data-mus="skip" title="Pular">⏭</button><button class="cb" data-mus="stop" title="Parar e limpar fila">⏹</button></div>`
+   :`<div class="empty" style="padding:26px 10px"><div style="font-size:44px">🎧</div><b style="color:var(--tx);font-family:var(--disp);font-size:17px">Nada tocando</b><br>Cole um link do YouTube aqui embaixo ou digite <code>/tocar link</code> no chat.</div>`}
+   <div class="lis ${listening?'on':''}"><div><b>${listening?'🔊 Você está ouvindo':'🔇 Você não está ouvindo'}</b><small>${listening?'A música toca no seu aparelho junto com todo mundo.':'Toque para ouvir junto com o servidor.'}</small></div><button class="btn ${listening?'s':''}" data-mus="${listening?'mute':'listen'}">${listening?'Parar de ouvir':'Ouvir'}</button></div>
+   ${listening?`<label class="mlab">Volume da música</label><input type="range" id="mvol" min="0" max="100" value="${ls.get('musvol',60)}" style="width:100%;accent-color:var(--ac)">`:''}
+   <form id="madd" class="copyrow" style="margin-top:14px"><input id="mlink" placeholder="Link do YouTube" style="background:var(--bg0);border:1px solid var(--line);border-radius:12px;padding:11px;outline:none;min-width:0"><button class="btn">Adicionar</button></form>
+   <div class="mlab" style="margin-top:16px">Próximas ${up.length?`(${up.length})`:''}</div>
+   ${up.length?up.map(x=>`<div class="qi"><img src="https://i.ytimg.com/vi/${esc(x.vid)}/default.jpg" alt=""><div><b>${esc(x.title)}</b><small>${esc(nameOf(x.by))}</small></div><button class="ib" data-mrm="${esc(x.id)}" title="Tirar da fila">✕</button></div>`).join(''):'<div class="empty" style="padding:8px">A fila está vazia.</div>'}
+  </div>`}
+function bindMusicPanel(){const f=$('#madd');if(f)f.onsubmit=e=>{e.preventDefault();const v=$('#mlink').value.trim();if(v){musicAdd(v,V.srv,V.ch||sortedChans('text')[0]?.id);$('#mlink').value=''}};
+  const mv=$('#mvol');if(mv)mv.oninput=e=>{ls.set('musvol',+e.target.value);try{YT_P?.setVolume(+e.target.value)}catch(_){}}}
+function renderMusicBar(){const b=$('#mbarside');if(!b)return;const s=DATA.servers[UI.listenSrv];const M=s?.music;const cur=M?.q?.[M.i];
+  if(!cur){b.classList.remove('on');return}b.classList.add('on');
+  b.innerHTML=`<img src="https://i.ytimg.com/vi/${esc(cur.vid)}/default.jpg" alt=""><div class="mi" data-gomusic><b>${esc(cur.title)}</b><small>${M.playing?'🎧 tocando':'⏸ pausado'} em ${esc(s.meta.name)}</small></div><button class="ib" data-mus="${M.playing?'pause':'play'}" data-msrv="${esc(s.code)}">${M.playing?'⏸':'▶'}</button><button class="ib" data-mus="skip" data-msrv="${esc(s.code)}">⏭</button>`}
+
+/* ---- IA ---- */
+const isAIQuestion=t=>/^(@ia\b|\/ia\b)/i.test((t||'').trim());
+function aiResponder(code){const s=DATA.servers[code];const on=onlineUsers(code);const cands=[...on].filter(u=>s.members[u]?.ai);if(profile().ai)cands.push(ME.id);return cands.sort()[0]||null}
+function aiTrigger(code,m){if(ls.get('ai-key','')){askAI(code,m);return}if(!aiResponder(code))toast('A IA está desligada. Alguém precisa colocar uma chave em Configurações → IA.')}
+function maybeAnswerAI(code,m){if(!isAIQuestion(m.text)||isBot(m.author))return;if(!profile().ai)return;
+  const authorHasAI=DATA.servers[code]?.members[m.author]?.ai;if(authorHasAI)return;if(aiResponder(code)!==ME.id)return;askAI(code,m)}
+async function askAI(code,m){const key=ls.get('ai-key','');if(!key)return;const s=DATA.servers[code];
+  const q=m.text.replace(/^(@ia|\/ia)\s*/i,'').trim();if(!q){botSay('bot:ia',code,m.ch,'Oi! Me pergunte algo assim: `@IA qual a capital da Austrália?`');return}
+  broadcast(code,'typing',{u:'bot:ia',ch:m.ch});if(V.srv===code&&V.ch===m.ch){UI.typing['bot:ia']=Date.now();renderTyping()}
+  const recent=Object.values(s.msgs[m.ch]||{}).filter(x=>!x.deleted&&x.text&&x.id!==m.id).sort((a,b)=>a.ts-b.ts).slice(-12).map(x=>`${nameOf(x.author)}: ${x.text.slice(0,400)}`).join('\n');
+  const sys=`Você é a "Nexo IA", assistente dentro do Nexo, um app de chat onde um grupo de amigos adolescentes conversa e joga. Responda em português do Brasil, de forma amigável, divertida e curta (no máximo uns 120 palavras, a não ser que peçam mais). Use markdown simples (**negrito**, listas). Mantenha tudo adequado para adolescentes. O servidor se chama "${s.meta.name}" e o canal "#${s.channels[m.ch]?.name||''}".`;
+  const user=`${recent?`Conversa recente do canal:\n${recent}\n\n`:''}${nameOf(m.author)} perguntou: ${q}`;
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:ls.get('ai-model','claude-haiku-5-5'),max_tokens:700,system:sys,messages:[{role:'user',content:user}]})});
+    const j=await r.json();if(!r.ok)throw new Error(j?.error?.message||('erro '+r.status));
+    const text=(j.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n').trim()||'…';
+    delete UI.typing['bot:ia'];renderTyping();botSay('bot:ia',code,m.ch,text.slice(0,3900),false,{replyTo:{id:m.id,author:m.author,text:(m.text||'').slice(0,100)}})}
+  catch(e){delete UI.typing['bot:ia'];renderTyping();toast('A IA não respondeu: '+String(e.message||e).slice(0,120))}}
+
 /* ---- jogos ---- */
-const GAMES={velha:{name:'Jogo da Velha',e:'❌⭕',desc:'3 em linha vence. Para 2 pessoas.'},lig4:{name:'Lig 4',e:'🔴🟡',desc:'Junte 4 peças em linha. Para 2 pessoas.'},ppt:{name:'Pedra, Papel e Tesoura',e:'✊✋✌️',desc:'Melhor de 5 rodadas. Para 2 pessoas.'}};
+const GAMES={uno:{name:'Uno',e:'🃏',desc:'De 2 a 6 pessoas. Quem zerar as cartas vence.',max:6},velha:{name:'Jogo da Velha',e:'❌⭕',desc:'3 em linha vence. Para 2 pessoas.'},lig4:{name:'Lig 4',e:'🔴🟡',desc:'Junte 4 peças em linha. Para 2 pessoas.'},ppt:{name:'Pedra, Papel e Tesoura',e:'✊✋✌️',desc:'Melhor de 5 rodadas. Para 2 pessoas.'}};
 function mergeGame(s,g){if(!g?.id)return false;s.games??={};const c=s.games[g.id];if(c&&(c.v||0)>=(g.v||0))return false;s.games[g.id]=g;return true}
 function gamesPop(x,y){if(!V.srv||!V.ch){toast('Os jogos ficam nos canais de texto dos servidores');return}
   pop(`<div class="menu"><div style="padding:6px 10px 8px;font-family:var(--disp);font-weight:700">Jogar em #${esc(chan().name)}</div>${Object.entries(GAMES).map(([k,g])=>`<button data-gstart="${k}"><span style="font-size:20px;width:46px">${g.e}</span><span style="text-align:left"><b style="display:block;color:var(--tx)">${g.name}</b><small style="color:var(--tx3)">${g.desc}</small></span></button>`).join('')}</div>`,x,y)}
+/* Uno */
+function shuffle(a){const r=crypto.getRandomValues(new Uint32Array(a.length));for(let i=a.length-1;i>0;i--){const j=r[i]%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function unoDeck(){const d=[];for(const c of 'rgby'){d.push(c+'0');for(let k=0;k<2;k++)for(const v of ['1','2','3','4','5','6','7','8','9','s','r','+'])d.push(c+v)}for(let k=0;k<4;k++)d.push('w','w4');return shuffle(d)}
+const uVal=c=>c[0]==='w'?c:c.slice(1);
+function unoCanPlay(g,c){const U=g.uno;const top=U.discard[U.discard.length-1];return c[0]==='w'||c[0]===U.color||uVal(c)===uVal(top)}
+function unoDrawN(U,u,n){for(let k=0;k<n;k++){if(!U.deck.length){const top=U.discard.pop();U.deck=shuffle(U.discard.map(c=>c));U.discard=[top]}if(!U.deck.length)break;U.hands[u].push(U.deck.pop())}}
+function unoStep(g,k){const n=g.players.length;g.turn=((g.turn+g.uno.dir*k)%n+n)%n;g.uno.drawn=false}
+function unoStart(id){const g=getGame(id);if(!g||g.players[0]!==ME.id||g.players.length<2||g.uno.started)return;const U={deck:unoDeck(),discard:[],hands:{},color:'',dir:1,drawn:false,started:true,last:'O jogo começou!'};
+  for(const u of g.players){U.hands[u]=[];}for(let k=0;k<7;k++)for(const u of g.players)U.hands[u].push(U.deck.pop());
+  let first;do{first=U.deck.pop();if(first[0]==='w'){U.deck.unshift(first);first=null}}while(!first);U.discard=[first];U.color=first[0];g.uno=U;g.turn=0;pushGame(g);sfx('join')}
+const UNO_CN={r:'vermelho',g:'verde',b:'azul',y:'amarelo'};
+function unoLabel(c){const v=uVal(c);return v==='s'?'⊘':v==='r'?'⇄':v==='+'?'+2':v==='w'?'★':v==='w4'?'+4':v}
+function unoPlay(id,i,chosen){const g=getGame(id);if(!g?.uno?.started||g.winner||g.players[g.turn]!==ME.id)return;const U=g.uno;const c=U.hands[ME.id][i];if(!c||!unoCanPlay(g,c))return;
+  if(c[0]==='w'&&!chosen)return;U.hands[ME.id].splice(i,1);U.discard.push(c);if(U.discard.length>30)U.discard=U.discard.slice(-30);U.color=c[0]==='w'?chosen:c[0];
+  const n=g.players.length;const v=uVal(c);const me=nameOf(ME.id);let skip=1;
+  U.last=`${me} jogou ${unoLabel(c)}${c[0]==='w'?' e escolheu '+UNO_CN[chosen]:''}`;
+  if(!U.hands[ME.id].length){g.winner=ME.id;U.last=`${me} zerou as cartas!`;pushGame(g);sfx('join');return}
+  if(v==='s')skip=2;
+  if(v==='r'){U.dir*=-1;if(n===2)skip=2}
+  if(v==='+'||v==='w4'){const nx=g.players[((g.turn+U.dir)%n+n)%n];unoDrawN(U,nx,v==='+'?2:4);U.last+=` — ${nameOf(nx)} comprou ${v==='+'?2:4} e perdeu a vez`;skip=2}
+  if(U.hands[ME.id].length===1)U.last+=' — UNO! 🔥';
+  unoStep(g,skip);pushGame(g)}
+function unoDraw(id){const g=getGame(id);if(!g?.uno?.started||g.winner||g.players[g.turn]!==ME.id||g.uno.drawn)return;unoDrawN(g.uno,ME.id,1);g.uno.drawn=true;g.uno.last=`${nameOf(ME.id)} comprou uma carta`;pushGame(g)}
+function unoPass(id){const g=getGame(id);if(!g?.uno?.started||g.players[g.turn]!==ME.id||!g.uno.drawn)return;g.uno.last=`${nameOf(ME.id)} passou a vez`;unoStep(g,1);pushGame(g)}
+function unoCard(c,attrs='',cls=''){const col=c[0]==='w'?'w':c[0];return `<button class="uc c-${col} ${cls}" ${attrs}><span>${unoLabel(c)}</span></button>`}
+function unoHTML(g){const U=g.uno||{};const me=g.players.indexOf(ME.id);
+  if(!U.started){const mx=6;return `<div class="gpl">${g.players.map((u,k)=>`<span class="gp">${k===0?'👑 ':''}${esc(nameOf(u))}</span>`).join('')}</div>
+    <div class="gs">${g.players.length}/${mx} jogadores ${me<0&&g.players.length<mx?`<button class="btn" data-gjoin="${g.id}">Entrar no jogo</button>`:''}${me===0?(g.players.length>=2?`<button class="btn" data-unostart="${g.id}">Começar</button>`:'<span>Esperando mais gente…</span>'):me>0?'<span>Esperando o dono do jogo começar…</span>':''}</div>`}
+  const top=U.discard[U.discard.length-1];const mine=!g.winner&&g.players[g.turn]===ME.id;
+  const opp=g.players.map((u,k)=>`<span class="gp ${!g.winner&&g.turn===k?'turn':''}">${esc(nameOf(u))} <b>${U.hands[u]?.length??0}🂠</b>${U.hands[u]?.length===1?' <em class="unot">UNO!</em>':''}</span>`).join('');
+  const hand=me>=0?(U.hands[ME.id]||[]).map((c,i)=>unoCard(c,mine&&unoCanPlay(g,c)?`data-uno="${g.id}|${i}"`:'disabled',mine&&unoCanPlay(g,c)?'ok':'')).join(''):'';
+  return `<div class="gpl">${opp}<span class="vs">${U.dir>0?'⟳':'⟲'}</span></div>
+   <div class="utable"><div class="upile">${unoCard(top,'disabled','big')}<span class="ucolor c-${U.color}"></span></div>
+   <div class="ulast">${esc(U.last||'')}</div>
+   ${mine&&!g.winner?`<div class="uact">${U.drawn?`<button class="btn s" data-unop="${g.id}">Passar a vez</button>`:`<button class="btn s" data-unod="${g.id}">Comprar carta</button>`}</div>`:''}</div>
+   ${me>=0?`<div class="uhand">${hand}</div>`:''}`}
 function freshBoard(type){return type==='velha'?Array(9).fill(0):type==='lig4'?Array(42).fill(0):null}
 function startGame(type){const s=srv();s.games??={};const t=Date.now();
-  const g={id:uid(10),ch:V.ch,type,players:[ME.id],turn:0,winner:null,line:null,board:freshBoard(type),picks:{},score:[0,0],round:1,last:null,ts:t,v:t};
+  const g={id:uid(10),ch:V.ch,type,players:[ME.id],turn:0,winner:null,line:null,board:freshBoard(type),picks:{},score:[0,0],round:1,last:null,ts:t,v:t};if(type==='uno')g.uno={started:false};
   s.games[g.id]=g;broadcast(V.srv,'game',g);
   const m={id:uid(14),ch:V.ch,author:ME.id,text:'',game:g.id,ts:t,v:t,reactions:{}};s.msgs[V.ch]??={};s.msgs[V.ch][m.id]=m;broadcast(V.srv,'msg',m);save();renderMsgs(true);sfx('send')}
 function getGame(id){return srv()?.games?.[id]}
 function pushGame(g){g.v=Math.max(Date.now(),(g.v||0)+1);broadcast(V.srv,'game',g);save();renderMsgs(nearBottom())}
-function gameJoin(id){const g=getGame(id);if(!g||g.players.length>=2||g.players.includes(ME.id))return;g.players.push(ME.id);pushGame(g);sfx('join')}
+function gameJoin(id){const g=getGame(id);const mx=GAMES[g?.type]?.max||2;if(!g||g.players.length>=mx||g.players.includes(ME.id)||g.uno?.started)return;g.players.push(ME.id);pushGame(g);sfx('join')}
 const LINES3=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 function win4(b){const at=(r,c)=>r>=0&&r<6&&c>=0&&c<7?b[r*7+c]:0;for(let r=0;r<6;r++)for(let c=0;c<7;c++){const v=at(r,c);if(!v)continue;
   for(const[dr,dc]of[[0,1],[1,0],[1,1],[1,-1]]){if(at(r+dr,c+dc)===v&&at(r+2*dr,c+2*dc)===v&&at(r+3*dr,c+3*dc)===v)return{v,line:[0,1,2,3].map(k=>(r+k*dr)*7+c+k*dc)}}}return null}
@@ -776,8 +945,10 @@ function gamePick(id,c){const g=getGame(id);if(!g||g.winner||g.players.length<2|
   const[a,b]=g.players;if(g.picks[a]&&g.picks[b]){const pa=g.picks[a],pb=g.picks[b];let r=0;if(pa!==pb)r=BEATS[pa]===pb?1:2;
     if(r)g.score[r-1]++;g.last={a:pa,b:pb,r};g.picks={};g.round++;if(g.score[0]>=3||g.score[1]>=3)g.winner=g.players[g.score[0]>=3?0:1]}
   pushGame(g)}
-function gameRematch(id){const g=getGame(id);if(!g||!g.players.includes(ME.id))return;Object.assign(g,{players:[g.players[1],g.players[0]].filter(Boolean),turn:0,winner:null,line:null,board:freshBoard(g.type),picks:{},score:[0,0],round:1,last:null,lastIdx:null});pushGame(g)}
+function gameRematch(id){const g=getGame(id);if(!g||!g.players.includes(ME.id))return;if(g.type==='uno'){Object.assign(g,{winner:null,turn:0,uno:{started:false},players:[ME.id,...g.players.filter(u=>u!==ME.id)]});pushGame(g);return}Object.assign(g,{players:[g.players[1],g.players[0]].filter(Boolean),turn:0,winner:null,line:null,board:freshBoard(g.type),picks:{},score:[0,0],round:1,last:null,lastIdx:null});pushGame(g)}
 function gameHTML(id){const g=getGame(id);if(!g)return `<div class="game"><div class="empty" style="padding:8px">Carregando jogo…</div></div>`;const G=GAMES[g.type];
+  if(g.type==='uno'){const me=g.players.indexOf(ME.id);const st=g.winner?`<div class="gs">${g.winner===ME.id?'Você venceu':esc(nameOf(g.winner))+' venceu'}! 🎉 ${me>=0?`<button class="btn s" style="padding:6px 12px" data-grematch="${g.id}">Jogar de novo</button>`:''}</div>`:(g.uno?.started?`<div class="gs">${g.players[g.turn]===ME.id?'Sua vez!':'Vez de '+esc(nameOf(g.players[g.turn]))}</div>`:'');
+    return `<div class="game uno"><div class="gh"><span class="ge">${G.e}</span><b>${G.name}</b></div>${unoHTML(g)}${st}</div>`}
   const[p1,p2]=g.players;const me=g.players.indexOf(ME.id);const mine=!g.winner&&g.players.length===2&&g.players[g.turn]===ME.id;
   const tag=(u,i)=>u?`<span class="gp ${!g.winner&&g.players.length===2&&g.turn===i&&g.type!=='ppt'?'turn':''}">${g.type==='velha'?(i?'⭕':'❌'):g.type==='lig4'?(i?'🟡':'🔴'):''} ${esc(nameOf(u))}${g.type==='ppt'?` <b>${g.score[i]}</b>`:''}</span>`:`<span class="gp wait">esperando…</span>`;
   let status='';
@@ -1040,7 +1211,7 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
   const needPerm=devs.some(d=>!d.label);const sinkOK='setSinkId' in HTMLMediaElement.prototype;
   const opts=(kind,cur)=>{const l=devs.filter(d=>d.kind===kind);return `<option value="">Padrão do sistema</option>`+l.filter(d=>d.deviceId&&d.deviceId!=='default'&&d.deviceId!=='communications').map((d,i)=>`<option value="${esc(d.deviceId)}" ${d.deviceId===cur?'selected':''}>${esc(d.label||(kind==='audioinput'?'Microfone ':kind==='audiooutput'?'Saída ':'Câmera ')+(i+1))}</option>`).join('')};
   const chk=(id,key,label,def=true)=>`<label style="display:flex;gap:10px;align-items:center;font-size:14px;color:var(--tx);margin:10px 0 0;font-weight:500"><input type="checkbox" id="${id}" data-key="${key}" style="width:18px;height:18px;accent-color:var(--ac)" ${ls.get(key,def)?'checked':''}> ${label}</label>`;
-  const tabs=`<div class="tabs" style="margin:6px 0 4px">${[['voz','Voz e vídeo'],['notif','Notificações'],['conta','Conta']].map(([k,n])=>`<button type="button" class="${setTab===k?'on':''}" data-stab="${k}">${n}</button>`).join('')}</div>`;
+  const tabs=`<div class="tabs" style="margin:6px 0 4px">${[['voz','Voz e vídeo'],['ia','IA'],['notif','Avisos'],['conta','Conta']].map(([k,n])=>`<button type="button" class="${setTab===k?'on':''}" data-stab="${k}">${n}</button>`).join('')}</div>`;
   let body='';
   if(setTab==='voz')body=`
    ${needPerm?`<div class="opt" style="cursor:default;margin-top:12px"><div style="font-size:22px">🎙️</div><div style="flex:1"><b>Mostrar o nome dos aparelhos</b><small>O navegador só mostra os nomes depois que você permite o microfone e a câmera.</small></div><button type="button" class="btn s" id="perm">Permitir</button></div>`:''}
@@ -1056,6 +1227,12 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
   if(setTab==='notif')body=`
    <label>Notificações</label>${np==='granted'?'<p class="sub">✅ Ativadas neste aparelho</p>':np==='unsupported'?'<p class="sub">Seu navegador não suporta.</p>':`<button type="button" class="btn s" id="np">${ico('bell')} Ativar notificações</button>`}
    ${chk('sf','sfx-on','Sons de mensagem e chamada')}${chk('nt','notif','Mostrar notificação quando o Nexo estiver em segundo plano')}`;
+  if(setTab==='ia')body=`
+   <p class="sub" style="margin-top:12px">A <b>Nexo IA</b> responde no chat quando alguém escreve <code>@IA</code> e uma pergunta. Ela usa a IA Claude, que precisa de uma <b>chave de API</b> da Anthropic (console.anthropic.com). O uso da chave é cobrado por quem é dono dela.</p>
+   <label>Chave de API</label><input id="aik" type="password" placeholder="sk-ant-…" value="${esc(ls.get('ai-key',''))}" autocomplete="off">
+   <p class="sub" style="font-size:12.5px;margin:6px 0 0">A chave fica só neste aparelho e nunca é enviada para os seus amigos.</p>
+   ${chk('ais','ai-share','Responder também quando meus amigos chamarem a @IA')}
+   <div class="row" style="justify-content:flex-start;margin-top:14px"><button type="button" class="btn s" id="aisave">Salvar chave</button>${ls.get('ai-key','')?'<button type="button" class="btn g" id="aiclr">Remover chave</button>':''}</div>`;
   if(setTab==='conta')body=`
    ${isStandalone()?'':`<label>App</label><button type="button" class="btn s" data-install>📲 Instalar o Nexo neste aparelho</button>`}
    <label>Onde ficam seus dados</label><p class="sub" style="margin:0">Suas mensagens, servidores e perfil ficam guardados neste aparelho e são copiados para os amigos quando vocês estão online juntos.</p>
@@ -1074,6 +1251,9 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
     md.querySelector('#tout')?.addEventListener('click',testOutput);
     md.querySelector('#ovol')?.addEventListener('input',e=>{ls.set('outvol',+e.target.value);md.querySelector('#ovl').textContent=e.target.value+'%';applyVolumes()});
     md.querySelector('#np')?.addEventListener('click',async()=>{try{const r=await Notification.requestPermission();toast(r==='granted'?'Notificações ativadas!':'Permissão negada');settingsModal()}catch(e){}});
+    md.querySelector('#aisave')?.addEventListener('click',()=>{const k=md.querySelector('#aik').value.trim();if(k&&!k.startsWith('sk-')){toast('Essa chave não parece certa. Ela começa com sk-');return}ls.set('ai-key',k);ME.v=Date.now();ls.set('me',ME);for(const c in ROOMS)broadcast(c,'hello',{u:profile()});toast(k?'Chave salva! Teste com @IA oi':'Chave removida');settingsModal()});
+    md.querySelector('#aiclr')?.addEventListener('click',()=>{ls.set('ai-key','');ME.v=Date.now();ls.set('me',ME);for(const c in ROOMS)broadcast(c,'hello',{u:profile()});settingsModal()});
+    md.querySelector('#ais')?.addEventListener('change',()=>{ME.v=Date.now();ls.set('me',ME);for(const c in ROOMS)broadcast(c,'hello',{u:profile()})});
     md.querySelector('#exp')?.addEventListener('click',async()=>{const txt=JSON.stringify({v:1,me:ME,data:DATA});try{await navigator.clipboard.writeText(txt);toast('Backup copiado. Cole num bloco de notas e guarde.')}catch(e){toast('Não consegui copiar')}});
     md.querySelector('#imp')?.addEventListener('click',()=>modal(`<h3>Restaurar backup</h3><p class="sub">Cole aqui o texto do backup. Isso substitui os dados deste aparelho.</p><textarea id="bk" rows="6"></textarea><div class="row"><button class="btn g" data-close>Cancelar</button><button class="btn" id="go">Restaurar</button></div>`,m2=>m2.querySelector('#go').onclick=async()=>{try{const j=JSON.parse(m2.querySelector('#bk').value);if(!j.me?.id||!j.data?.servers)throw 0;ls.set('me',j.me);await idb.set('data',j.data);location.reload()}catch(e){toast('Esse texto não é um backup do Nexo')}}));
     const r=md.querySelector('#reset');r?.addEventListener('click',async()=>{if(!r.dataset.ok){r.dataset.ok=1;r.textContent='Tem certeza? Toque de novo';return}
@@ -1113,7 +1293,7 @@ function autoGrow(){const i=$('#inp');i.style.height='auto';i.style.height=Math.
 
 /* ---- eventos ---- */
 document.addEventListener('click',e=>{
-  const t=e.target.closest('[data-home],[data-sv],[data-newsv],[data-joinsv],[data-ch],[data-chset],[data-newch],[data-dm],[data-newdm],[data-dmto],[data-mention],[data-editprof],[data-settings],[data-user],[data-react],[data-rq],[data-reply],[data-pin],[data-edit],[data-del],[data-pick],[data-etab],[data-jump],[data-close],[data-joincall],[data-mute],[data-deaf],[data-cam],[data-screen],[data-flip],[data-leave],[data-gocall],[data-callx],[data-install],[data-kick],[data-gstart],[data-gjoin],[data-gmove],[data-gpick],[data-grematch],[data-gamesbtn],[data-m],.spl,img.att');
+  const t=e.target.closest('[data-home],[data-sv],[data-newsv],[data-joinsv],[data-ch],[data-chset],[data-newch],[data-dm],[data-newdm],[data-dmto],[data-mention],[data-editprof],[data-settings],[data-user],[data-react],[data-rq],[data-reply],[data-pin],[data-edit],[data-del],[data-pick],[data-etab],[data-jump],[data-close],[data-joincall],[data-mute],[data-deaf],[data-cam],[data-screen],[data-flip],[data-leave],[data-gocall],[data-callx],[data-install],[data-mus],[data-mrm],[data-gomusic],[data-uno],[data-unod],[data-unop],[data-unostart],[data-unoc],[data-kick],[data-gstart],[data-gjoin],[data-gmove],[data-gpick],[data-grematch],[data-gamesbtn],[data-m],.spl,img.att');
   if(!e.target.closest('#pop')&&!e.target.closest('#emoBtn')&&!(t&&('react' in t.dataset)))closePop();
   if(!t){document.querySelectorAll('.m.tap').forEach(x=>x.classList.remove('tap'));const mm=e.target.closest('.m');if(mm&&matchMedia('(hover:none)').matches)mm.classList.add('tap');return}
   const d=t.dataset;
@@ -1149,6 +1329,14 @@ document.addEventListener('click',e=>{
   else if('flip' in d)switchCam();
   else if('leave' in d)leaveCall();
   else if('install' in d){closeModal();installApp()}
+  else if(d.mus){const code=d.msrv||V.srv;({play:()=>musicResume(code),pause:()=>musicPause(code),skip:()=>musicSkip(code),stop:()=>musicStop(code),prev:()=>musicSeek(0,code),listen:()=>musicListen(code,true),mute:()=>musicListen(code,false)})[d.mus]?.()}
+  else if(d.mrm)musicRemove(d.mrm);
+  else if('gomusic' in d){if(UI.listenSrv&&DATA.servers[UI.listenSrv]){openServer(UI.listenSrv);UI.panel='music';renderPanel();renderTop()}}
+  else if(d.unoc){const[g,i,c]=d.unoc.split('|');closePop();unoPlay(g,+i,c)}
+  else if(d.uno){const[g,i]=d.uno.split('|');const G=getGame(g);const card=G?.uno?.hands[ME.id]?.[+i];if(card&&card[0]==='w'){const r=t.getBoundingClientRect();pop(`<div style="padding:4px"><b style="font-family:var(--disp)">Escolha a cor</b><div class="unocol">${['r','y','g','b'].map(c=>`<button data-unoc="${g}|${i}|${c}" class="c-${c}"></button>`).join('')}</div></div>`,r.left,r.top-110)}else unoPlay(g,+i)}
+  else if(d.unod)unoDraw(d.unod);
+  else if(d.unop)unoPass(d.unop);
+  else if(d.unostart)unoStart(d.unostart);
   else if(d.kick){closePop();kickModal(d.kick)}
   else if('gamesbtn' in d){const r=t.getBoundingClientRect();gamesPop(r.left,r.top-250)}
   else if(d.gstart){closePop();startGame(d.gstart)}
@@ -1168,6 +1356,7 @@ $('#sideHead').onclick=e=>{e.stopPropagation();if(V.srv)serverMenu()};
 $('#burger').onclick=()=>document.body.classList.toggle('nav');
 $('#main').addEventListener('click',e=>{if(document.body.classList.contains('nav')&&innerWidth<=700&&!e.target.closest('#burger')){document.body.classList.remove('nav');e.stopPropagation();e.preventDefault()}},true);
 $('#memBtn').onclick=()=>{UI.showMem=!UI.showMem;ls.set('mem',UI.showMem);renderMem();renderTop()};
+$('#musicBtn').onclick=()=>{UI.panel=UI.panel==='music'?null:'music';renderPanel();renderTop()};
 $('#pinsBtn').onclick=()=>{UI.panel=UI.panel==='pins'?null:'pins';renderPanel();renderTop()};
 $('#inviteBtn').onclick=()=>inviteModal();
 $('#callBtn').onclick=()=>dmCall(false);$('#vidBtn').onclick=()=>dmCall(true);
@@ -1188,7 +1377,7 @@ document.addEventListener('paste',async e=>{const f=[...(e.clipboardData?.files|
 $('#msgs').addEventListener('keydown',e=>{const b=e.target.closest('[data-editbox]');if(!b)return;
   if(e.key==='Escape'){UI.editing=null;renderMsgs(false)}
   else if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();const id=b.dataset.editbox,txt=b.value.trim();UI.editing=null;const m=getMsg(id);if(txt&&m&&txt!==m.text)updateMsg(id,{text:txt,edited:true});else renderMsgs(false)}});
-$('#hint').innerHTML='<b>**negrito**</b> · <i>*itálico*</i> · `código` · ||spoiler|| · &gt; citação · @nome';
+$('#hint').innerHTML='<b>/ajuda</b> mostra os comandos · <b>/tocar</b> link do YouTube · <b>@IA</b> pergunta para a IA';
 addEventListener('hashchange',()=>{const m=location.hash.match(/entrar=([a-z0-9]+)/i);if(m&&ME){joinServer(m[1]);history.replaceState(null,'',location.pathname)}});
 addEventListener('beforeunload',()=>{if(CALL)broadcast(CALL.srv,'vstate',{u:ME.id,ch:null})});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(V.ch||V.dm)markRead()}});
@@ -1224,6 +1413,8 @@ async function start(){
   await loadNet();
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   for(const code in DATA.servers)connect(code);
+  if(UI.listenSrv&&!DATA.servers[UI.listenSrv]){UI.listenSrv=null;ls.set('listen',null)}renderMusicBar();
+  if(UI.listenSrv){const once=()=>{musicListen(UI.listenSrv,true);removeEventListener('pointerdown',once)};addEventListener('pointerdown',once)}
   const m=location.hash.match(/entrar=([a-z0-9]+)/i);if(m){joinServer(m[1]);history.replaceState(null,'',location.pathname)}
   renderAll();
   if(innerWidth<=700&&(V.ch||V.dm))document.body.classList.remove('nav');
