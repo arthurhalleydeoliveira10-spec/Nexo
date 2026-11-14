@@ -468,6 +468,10 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
+const APP_VERSION='2026.11.14-1';
+const MAIN_HOST='nexotche.netlify.app';
+// todo mundo precisa estar no mesmo site para se encontrar
+if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
 // Se algum amigo não conseguir se conectar (redes muito fechadas, como 4G de algumas operadoras),
 // coloque aqui um servidor TURN. Ex.: [{urls:'turn:SEU_SERVIDOR:3478',username:'user',credential:'senha'}]
 const TURN=[];
@@ -1270,6 +1274,7 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
    ${isStandalone()?'':`<label>App</label><button type="button" class="btn s" data-install>📲 Instalar o Nexo neste aparelho</button>`}
    <label>Onde ficam seus dados</label><p class="sub" style="margin:0">Suas mensagens, servidores e perfil ficam guardados neste aparelho e são copiados para os amigos quando vocês estão online juntos.</p>
    <label>Cópia de segurança</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn s" id="exp">Copiar backup</button><button type="button" class="btn s" id="imp">Restaurar backup</button></div>
+   <label>Versão do app</label><p class="sub" style="margin:0">${APP_VERSION} · ${location.hostname||'arquivo local'}</p>
    <label>Seu ID</label><code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--tx2)">${esc(ME.id)}</code>
    <div class="row" style="justify-content:flex-start"><button type="button" class="btn r" id="reset">Apagar meus dados deste aparelho</button></div>`;
   modal(`<h3>Configurações</h3>${tabs}${body}<div class="row"><button class="btn" data-close>Pronto</button></div>`,md=>{
@@ -1415,6 +1420,16 @@ addEventListener('hashchange',()=>{const m=location.hash.match(/entrar=([a-z0-9]
 addEventListener('beforeunload',()=>{if(CALL)broadcast(CALL.srv,'vstate',{u:ME.id,ch:null})});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){if(V.ch||V.dm)markRead()}});
 
+/* ---- atualização automática ---- */
+let updating=false;
+async function checkUpdate(){if(updating||!/^https?:$/.test(location.protocol))return;
+  try{const h=await fetch('index.html',{cache:'no-store'}).then(r=>r.ok?r.text():'');const m=h.match(/const APP_VERSION='([^']+)'/);if(!m||m[1]===APP_VERSION)return;
+    updating=true;try{await SWREG?.update()}catch(e){}
+    if(CALL){const b=$('#banner');b.innerHTML=`Tem uma versão nova do Nexo. <button class="btn s" style="padding:4px 10px;margin-left:8px" id="updnow">Atualizar agora</button>`;b.classList.add('on');b.classList.remove('red');$('#updnow').onclick=()=>location.reload();return}
+    toast('Atualizando o Nexo para a versão nova…');setTimeout(()=>location.reload(),1200)}catch(e){}}
+setInterval(checkUpdate,3*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
+
 /* ---- app instalável ---- */
 let SWREG=null,installEvt=null;
 const isStandalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
@@ -1443,7 +1458,7 @@ async function start(){
   renderAll();renderMsgs(true);
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   banner(location.protocol==='file:'?$('#banner').textContent:'Conectando…');
-  await loadNet();loadCaps();
+  await loadNet();loadCaps();setTimeout(checkUpdate,8000);
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   for(const code in DATA.servers)connect(code);
   if(UI.listenSrv&&!DATA.servers[UI.listenSrv]){UI.listenSrv=null;ls.set('listen',null)}renderMusicBar();
