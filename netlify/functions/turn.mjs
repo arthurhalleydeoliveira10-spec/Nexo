@@ -4,7 +4,7 @@ const json = (o, status = 200, cache = 'no-store') => new Response(JSON.stringif
 const clean = v => (v || '').trim().replace(/^["']|["']$/g, '');
 
 export default async () => {
-  let domain = clean(process.env.METERED_DOMAIN).replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  let domain = (clean(process.env.METERED_DOMAIN) || 'nexoarthur.metered.live').replace(/^https?:\/\//, '').replace(/\/.*$/, '');
   const key = clean(process.env.METERED_API_KEY);
   if (!domain || !key) return json({ configured: false, iceServers: [] });
   if (!domain.includes('.')) domain += '.metered.live';
