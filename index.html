@@ -468,7 +468,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-3';
+const APP_VERSION='2026.11.14-4';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -561,12 +561,12 @@ async function loadTurn(){if(!/^https?:$/.test(location.protocol))return;
   try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),4000);const r=await fetch('/.netlify/functions/turn',{signal:ctl.signal});clearTimeout(t);
     const j=await r.json();if(Array.isArray(j.iceServers)&&j.iceServers.length){TURN=j.iceServers;CAPS.turn=true}}catch(e){}}
 async function loadNet(){
-  try{const mod=await import('https://esm.run/trystero@0.21.6');NETMOD=mod;joinRoomFn=mod.joinRoom;netOK=true;banner('')}
+  try{const mod=await import('https://esm.run/trystero@0.21.6/mqtt');NETMOD=mod;joinRoomFn=mod.joinRoom;netOK=true;banner('')}
   catch(e){console.error(e);banner('Não consegui carregar a conexão. Verifique sua internet e recarregue a página.',true)}}
 function banner(t,red){const b=$('#banner');b.textContent=t;b.classList.toggle('on',!!t);b.classList.toggle('red',!!red)}
 const ACTIONS=['hello','sync','msg','chan','meta','typing','vstate','dm','react','bye','game','music'];
 function connect(code){if(!joinRoomFn||ROOMS[code])return;
-  const room=joinRoomFn({appId:APP_ID,password:'nx-'+code,turnConfig:TURN,relayUrls:RELAYS,relayRedundancy:RELAYS.length},'srv-'+code,err=>{console.warn(err);toast('Problema ao conectar ao servidor')});
+  const room=joinRoomFn({appId:APP_ID,password:'nx-'+code,turnConfig:TURN},'srv-'+code,err=>{console.warn(err);toast('Problema ao conectar ao servidor')});
   const A={};const R={room,A,peers:{}};ROOMS[code]=R;
   for(const n of ACTIONS){const[s,g]=room.makeAction(n);A[n]=s;g((d,p)=>{try{handle(code,n,d,p)}catch(e){console.warn(n,e)}})}
   room.onPeerJoin(p=>greet(code,p));
