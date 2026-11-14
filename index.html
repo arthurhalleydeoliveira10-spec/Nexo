@@ -468,13 +468,15 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-1';
+const APP_VERSION='2026.11.14-2';
 const MAIN_HOST='nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
 // Se algum amigo não conseguir se conectar (redes muito fechadas, como 4G de algumas operadoras),
 // coloque aqui um servidor TURN. Ex.: [{urls:'turn:SEU_SERVIDOR:3478',username:'user',credential:'senha'}]
-const TURN=[];
+let TURN=[];
+// servidores de sinalização (onde os apps se encontram) — testados e funcionando
+const RELAYS=['wss://relay.damus.io','wss://relay.nostraddress.com','wss://nostr.mom','wss://relay.primal.net','wss://offchain.pub','wss://nos.lol','wss://relay.snort.social'];
 
 /* ---------------- utilidades ---------------- */
 const $=s=>document.querySelector(s);
@@ -555,13 +557,16 @@ function avatar(u,size,st,cls=''){const m=member(u);const n=m?.name||'?';
   return `<div class="av ${cls}" data-av="${esc(u)}" style="${bg}${size?`width:${size}px;height:${size}px;font-size:${Math.round(size*.4)}px`:''}" data-user="${esc(u)}">${m?.avatar?'':esc((n[0]||'?').toUpperCase())}${st?`<span class="st ${statusOf(u)}"></span>`:''}</div>`}
 
 /* ---------------- rede (Trystero) ---------------- */
+async function loadTurn(){if(!/^https?:$/.test(location.protocol))return;
+  try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),4000);const r=await fetch('/.netlify/functions/turn',{signal:ctl.signal});clearTimeout(t);
+    const j=await r.json();if(Array.isArray(j.iceServers)&&j.iceServers.length){TURN=j.iceServers;CAPS.turn=true}}catch(e){}}
 async function loadNet(){
   try{const mod=await import('https://esm.run/trystero@0.21.6');joinRoomFn=mod.joinRoom;netOK=true;banner('')}
   catch(e){console.error(e);banner('Não consegui carregar a conexão. Verifique sua internet e recarregue a página.',true)}}
 function banner(t,red){const b=$('#banner');b.textContent=t;b.classList.toggle('on',!!t);b.classList.toggle('red',!!red)}
 const ACTIONS=['hello','sync','msg','chan','meta','typing','vstate','dm','react','bye','game','music'];
 function connect(code){if(!joinRoomFn||ROOMS[code])return;
-  const room=joinRoomFn({appId:APP_ID,password:'nx-'+code,turnConfig:TURN},'srv-'+code,err=>{console.warn(err);toast('Problema ao conectar ao servidor')});
+  const room=joinRoomFn({appId:APP_ID,password:'nx-'+code,turnConfig:TURN,relayUrls:RELAYS,relayRedundancy:RELAYS.length},'srv-'+code,err=>{console.warn(err);toast('Problema ao conectar ao servidor')});
   const A={};const R={room,A,peers:{}};ROOMS[code]=R;
   for(const n of ACTIONS){const[s,g]=room.makeAction(n);A[n]=s;g((d,p)=>{try{handle(code,n,d,p)}catch(e){console.warn(n,e)}})}
   room.onPeerJoin(p=>greet(code,p));
@@ -1275,6 +1280,7 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
    <label>Onde ficam seus dados</label><p class="sub" style="margin:0">Suas mensagens, servidores e perfil ficam guardados neste aparelho e são copiados para os amigos quando vocês estão online juntos.</p>
    <label>Cópia de segurança</label><div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn s" id="exp">Copiar backup</button><button type="button" class="btn s" id="imp">Restaurar backup</button></div>
    <label>Versão do app</label><p class="sub" style="margin:0">${APP_VERSION} · ${location.hostname||'arquivo local'}</p>
+   <label>Servidor de apoio para chamadas</label><p class="sub" style="margin:0">${CAPS.turn?'✅ Ligado: as calls funcionam mesmo em redes que bloqueiam conexão direta':'⚪ Desligado'}</p>
    <label>Seu ID</label><code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--tx2)">${esc(ME.id)}</code>
    <div class="row" style="justify-content:flex-start"><button type="button" class="btn r" id="reset">Apagar meus dados deste aparelho</button></div>`;
   modal(`<h3>Configurações</h3>${tabs}${body}<div class="row"><button class="btn" data-close>Pronto</button></div>`,md=>{
@@ -1458,7 +1464,7 @@ async function start(){
   renderAll();renderMsgs(true);
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   banner(location.protocol==='file:'?$('#banner').textContent:'Conectando…');
-  await loadNet();loadCaps();setTimeout(checkUpdate,8000);
+  await Promise.all([loadNet(),loadTurn()]);loadCaps();setTimeout(checkUpdate,8000);
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   for(const code in DATA.servers)connect(code);
   if(UI.listenSrv&&!DATA.servers[UI.listenSrv]){UI.listenSrv=null;ls.set('listen',null)}renderMusicBar();
