@@ -468,13 +468,13 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-2';
+const APP_VERSION='2026.11.14-3';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
 // Se algum amigo não conseguir se conectar (redes muito fechadas, como 4G de algumas operadoras),
 // coloque aqui um servidor TURN. Ex.: [{urls:'turn:SEU_SERVIDOR:3478',username:'user',credential:'senha'}]
-let TURN=[];
+let TURN=[];let NETMOD=null;
 // servidores de sinalização (onde os apps se encontram) — testados e funcionando
 const RELAYS=['wss://relay.damus.io','wss://relay.nostraddress.com','wss://nostr.mom','wss://relay.primal.net','wss://offchain.pub','wss://nos.lol','wss://relay.snort.social'];
 
@@ -561,7 +561,7 @@ async function loadTurn(){if(!/^https?:$/.test(location.protocol))return;
   try{const ctl=new AbortController();const t=setTimeout(()=>ctl.abort(),4000);const r=await fetch('/.netlify/functions/turn',{signal:ctl.signal});clearTimeout(t);
     const j=await r.json();if(Array.isArray(j.iceServers)&&j.iceServers.length){TURN=j.iceServers;CAPS.turn=true}}catch(e){}}
 async function loadNet(){
-  try{const mod=await import('https://esm.run/trystero@0.21.6');joinRoomFn=mod.joinRoom;netOK=true;banner('')}
+  try{const mod=await import('https://esm.run/trystero@0.21.6');NETMOD=mod;joinRoomFn=mod.joinRoom;netOK=true;banner('')}
   catch(e){console.error(e);banner('Não consegui carregar a conexão. Verifique sua internet e recarregue a página.',true)}}
 function banner(t,red){const b=$('#banner');b.textContent=t;b.classList.toggle('on',!!t);b.classList.toggle('red',!!red)}
 const ACTIONS=['hello','sync','msg','chan','meta','typing','vstate','dm','react','bye','game','music'];
@@ -574,6 +574,7 @@ function connect(code){if(!joinRoomFn||ROOMS[code])return;
     if(u&&VOICE[code]?.[u]?.peer===p){delete VOICE[code][u];if(CALL&&CALL.srv===code)sfx('leave')}renderAll()});
   room.onPeerStream((stream,p,meta)=>onStream(code,stream,p,meta));
 }
+function reconnectAll(){if(CALL)leaveCall(true);for(const code of Object.keys(ROOMS)){try{ROOMS[code].room.leave()}catch(e){}delete ROOMS[code];delete VOICE[code]}for(const code in DATA.servers)connect(code);renderAll()}
 function greet(code,p){const R=ROOMS[code];if(!R)return;
   R.A.hello({u:profile()},p);R.A.sync(syncPayload(code),p);
   if(CALL&&CALL.srv===code)R.A.vstate(myV(),p)}
@@ -1251,7 +1252,7 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
   const needPerm=devs.some(d=>!d.label);const sinkOK='setSinkId' in HTMLMediaElement.prototype;
   const opts=(kind,cur)=>{const l=devs.filter(d=>d.kind===kind);return `<option value="">Padrão do sistema</option>`+l.filter(d=>d.deviceId&&d.deviceId!=='default'&&d.deviceId!=='communications').map((d,i)=>`<option value="${esc(d.deviceId)}" ${d.deviceId===cur?'selected':''}>${esc(d.label||(kind==='audioinput'?'Microfone ':kind==='audiooutput'?'Saída ':'Câmera ')+(i+1))}</option>`).join('')};
   const chk=(id,key,label,def=true)=>`<label style="display:flex;gap:10px;align-items:center;font-size:14px;color:var(--tx);margin:10px 0 0;font-weight:500"><input type="checkbox" id="${id}" data-key="${key}" style="width:18px;height:18px;accent-color:var(--ac)" ${ls.get(key,def)?'checked':''}> ${label}</label>`;
-  const tabs=`<div class="tabs" style="margin:6px 0 4px">${[['voz','Voz e vídeo'],['ia','IA'],['notif','Avisos'],['conta','Conta']].map(([k,n])=>`<button type="button" class="${setTab===k?'on':''}" data-stab="${k}">${n}</button>`).join('')}</div>`;
+  const tabs=`<div class="tabs" style="margin:6px 0 4px">${[['voz','Voz e vídeo'],['net','Conexão'],['ia','IA'],['notif','Avisos'],['conta','Conta']].map(([k,n])=>`<button type="button" class="${setTab===k?'on':''}" data-stab="${k}">${n}</button>`).join('')}</div>`;
   let body='';
   if(setTab==='voz')body=`
    ${needPerm?`<div class="opt" style="cursor:default;margin-top:12px"><div style="font-size:22px">🎙️</div><div style="flex:1"><b>Mostrar o nome dos aparelhos</b><small>O navegador só mostra os nomes depois que você permite o microfone e a câmera.</small></div><button type="button" class="btn s" id="perm">Permitir</button></div>`:''}
@@ -1268,6 +1269,16 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
   if(setTab==='notif')body=`
    <label>Notificações</label>${np==='granted'?'<p class="sub">✅ Ativadas neste aparelho</p>':np==='unsupported'?'<p class="sub">Seu navegador não suporta.</p>':`<button type="button" class="btn s" id="np">${ico('bell')} Ativar notificações</button>`}
    ${chk('sf','sfx-on','Sons de mensagem e chamada')}${chk('nt','notif','Mostrar notificação quando o Nexo estiver em segundo plano')}`;
+  if(setTab==='net'){let rel={open:0,total:0};try{for(const ws of Object.values(NETMOD?.getRelaySockets?.()||{})){rel.total++;if(ws.readyState===1)rel.open++}}catch(e){}
+    const rows=Object.values(DATA.servers).map(sv=>{const R=ROOMS[sv.code];const n=R?Object.keys(R.peers).length:0;const pc=R?Object.values(R.room.getPeers?.()||{}):[];
+      const st=pc.map(c=>c?.connectionState||c?.iceConnectionState||'?');
+      return `<div class="opt" style="cursor:default"><div style="font-size:20px">${n?'🟢':'🔴'}</div><div style="flex:1"><b>${esc(sv.meta.name)}</b><small>${n} ${n===1?'pessoa conectada':'pessoas conectadas'} com você${st.length?' · '+st.join(', '):''}<br>Código: ${esc(sv.code)}</small></div></div>`}).join('')||'<p class="sub">Você ainda não está em nenhum servidor.</p>';
+    body=`<p class="sub" style="margin-top:12px">Use esta tela para descobrir por que alguém não aparece. Os dois precisam ver o <b>mesmo código</b> do servidor e o mesmo endereço do app.</p>
+     <div class="opt" style="cursor:default"><div style="font-size:20px">${rel.open?'🟢':'🔴'}</div><div><b>Servidores de encontro</b><small>${rel.open} de ${rel.total} funcionando. Com 0, ninguém consegue se encontrar.</small></div></div>
+     <div class="opt" style="cursor:default"><div style="font-size:20px">${CAPS.turn?'🟢':'⚪'}</div><div><b>Apoio para chamadas (TURN)</b><small>${CAPS.turn?'Ligado':'Desligado — ajuda quando a internet bloqueia conexão direta'}</small></div></div>
+     <div class="opt" style="cursor:default"><div style="font-size:20px">🌐</div><div><b>Endereço do app</b><small>${esc(location.host)} · versão ${APP_VERSION}</small></div></div>
+     <label>Servidores</label>${rows}
+     <div class="row" style="justify-content:flex-start"><button type="button" class="btn s" id="reconn">Reconectar tudo</button><button type="button" class="btn g" id="netref">Atualizar</button></div>`}
   if(setTab==='ia')body=`
    ${CAPS.ai?'<div class="opt on" style="cursor:default;margin-top:12px"><div style="font-size:22px">✨</div><div><b>A IA já está ligada para todo mundo</b><small>Ninguém precisa configurar nada. É só escrever @IA e a pergunta no chat.</small></div></div>':''}
    <p class="sub" style="margin-top:12px">A <b>Nexo IA</b> responde no chat quando alguém escreve <code>@IA</code> e uma pergunta. Ela usa a IA Claude, que precisa de uma <b>chave de API</b> da Anthropic (console.anthropic.com). O uso da chave é cobrado por quem é dono dela.</p>
@@ -1285,6 +1296,8 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
    <div class="row" style="justify-content:flex-start"><button type="button" class="btn r" id="reset">Apagar meus dados deste aparelho</button></div>`;
   modal(`<h3>Configurações</h3>${tabs}${body}<div class="row"><button class="btn" data-close>Pronto</button></div>`,md=>{
     md.querySelectorAll('[data-stab]').forEach(b=>b.onclick=()=>{stopMicTest();settingsModal(b.dataset.stab)});
+    md.querySelector('#netref')?.addEventListener('click',()=>settingsModal('net'));
+    md.querySelector('#reconn')?.addEventListener('click',()=>{reconnectAll();toast('Reconectando…');setTimeout(()=>settingsModal('net'),6000)});
     md.querySelectorAll('input[data-key]').forEach(c=>c.onchange=()=>{ls.set(c.dataset.key,c.checked);if(['ns','echo','agc'].includes(c.dataset.key)&&CALL)switchMic()});
     md.querySelector('#perm')?.addEventListener('click',async()=>{try{const st=await navigator.mediaDevices.getUserMedia({audio:true,video:true}).catch(()=>navigator.mediaDevices.getUserMedia({audio:true}));st.getTracks().forEach(t=>t.stop())}catch(e){toast('Permissão negada');return}settingsModal()});
     md.querySelector('#dmic')?.addEventListener('change',e=>{ls.set('dev:mic',e.target.value);if(CALL)switchMic();if(micTest)startMicTest(md,md.querySelector('#hear').checked);toast('Microfone trocado')});
