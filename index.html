@@ -396,6 +396,62 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .uhand{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 10px}
 .unot{color:var(--yel);font-style:normal;font-weight:800;font-size:11px}
 .unocol{display:flex;gap:8px;margin-top:8px}.unocol button{width:44px;height:44px;border-radius:12px}.unocol .c-r{background:#ef3b4f}.unocol .c-y{background:#f2b52b}.unocol .c-g{background:#1fb96b}.unocol .c-b{background:#2f7cf6}
+/* ================= visual 2026.11 — painéis flutuantes ================= */
+:root{
+  --bg0:#07060e;--bg1:#110f1d;--bg2:#151324;--bg3:#211d36;--bg4:#2c2747;--bg5:#3a335d;
+  --tx:#f4f1ff;--tx2:#bcb5dc;--tx3:#8079a6;
+  --line:rgba(205,190,255,.075);--edge:rgba(255,255,255,.07);
+  --panel:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,0) 160px),var(--bg2);
+}
+html{background:var(--bg0)}body{background:transparent}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background:
+  radial-gradient(40% 35% at 0% 0%,rgba(255,79,154,.16),transparent 70%),
+  radial-gradient(45% 40% at 100% 100%,rgba(77,225,255,.10),transparent 70%),
+  radial-gradient(35% 30% at 60% 0%,rgba(139,92,255,.14),transparent 70%)}
+#app{padding:calc(10px + var(--sat)) 10px 10px 0;gap:10px;background:transparent}
+#rail{background:transparent;padding-top:4px}
+#side{background:var(--bg1);border-radius:22px;border:1px solid var(--edge);overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+#sideHead{border-radius:0;height:60px}
+#main{background:var(--panel);border-radius:22px;border:1px solid var(--edge);overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+#top{background:rgba(21,19,36,.72);height:60px;border-bottom:1px solid var(--line)}
+#mem{background:rgba(9,8,17,.35);border-left:1px solid var(--line);padding:14px 10px}
+#panel{background:var(--bg1)}
+.ch{border-radius:12px}
+.ch.on{background:linear-gradient(90deg,rgba(255,79,154,.16),rgba(139,92,255,.08));color:#fff;box-shadow:inset 0 0 0 1px rgba(255,79,154,.18)}
+.ch.on svg.i{color:#ff7fb5}
+#me{background:rgba(255,255,255,.035);border:1px solid var(--edge)}
+.sv{box-shadow:inset 0 0 0 1px rgba(255,255,255,.08),0 6px 16px rgba(0,0,0,.25)}
+.m{margin:0 10px;padding:4px 14px;border-radius:14px}
+.m:hover{background:rgba(255,255,255,.035)}
+.m .tx{color:#e9e5fb}
+.daysep{margin:20px 24px 6px}
+.daysep::before,.daysep::after{background:linear-gradient(90deg,transparent,var(--bg4),transparent)}
+#box{background:rgba(33,29,54,.82);border-radius:20px;border:1px solid var(--edge);backdrop-filter:blur(10px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+#box:focus-within{border-color:rgba(255,79,154,.45);box-shadow:0 0 0 4px rgba(255,79,154,.08),0 10px 30px rgba(0,0,0,.25)}
+#sendBtn{border-radius:14px;box-shadow:0 6px 18px rgba(255,79,154,.35)}
+.mg{font-size:12px;letter-spacing:.02em;padding:12px 8px 6px}
+.mr{border-radius:12px;padding:7px 8px}
+.mr .sub.oldv{color:var(--yel);font-weight:600}
+.md{background:linear-gradient(180deg,rgba(255,255,255,.03),transparent 120px),var(--bg2);border:1px solid var(--edge);border-radius:26px}
+.opt{background:rgba(255,255,255,.04);border:1px solid var(--edge)}
+.opt.on{border-color:var(--ac)}
+.btn.wa{display:flex;justify-content:center;align-items:center;gap:8px;background:#25d366;color:#04301a;margin-top:14px;text-decoration:none}
+.netpill{display:flex;align-items:center;gap:7px;height:30px;padding:0 12px 0 10px;border-radius:15px;font-size:12.5px;font-weight:600;white-space:nowrap;flex-shrink:0;margin-right:4px;
+  background:rgba(62,224,143,.09);color:#a6f3cb;border:1px solid rgba(62,224,143,.22);transition:background .2s}
+.netpill:hover{background:rgba(62,224,143,.16)}
+.netpill span{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(62,224,143,.6);animation:ping 2.4s infinite}
+.netpill.wait{background:rgba(255,200,87,.09);color:#ffe2a3;border-color:rgba(255,200,87,.25)}.netpill.wait span{background:var(--yel);animation:blink 1s infinite}
+.netpill.bad{background:rgba(255,84,104,.12);color:#ffb3bd;border-color:rgba(255,84,104,.3)}.netpill.bad span{background:var(--red);animation:none}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(62,224,143,.55)}70%,100%{box-shadow:0 0 0 7px rgba(62,224,143,0)}}
+@keyframes blink{50%{opacity:.3}}
+.joinwait .big{background:var(--bg3);box-shadow:none;font-size:34px}
+.joinwait .big.spin{animation:sway 1.6s ease-in-out infinite}
+@keyframes sway{50%{transform:rotate(14deg)}}
+.joinwait .sub2{margin-top:10px;font-size:13px;color:var(--tx3)}
+.home{background:transparent}
+.hc{background:rgba(255,255,255,.04);border:1px solid var(--edge)}
+.hc:hover{background:rgba(255,255,255,.07)}
+.game{background:rgba(9,8,17,.45);border:1px solid var(--edge)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:900px){
   #mem{position:fixed;right:0;top:var(--sat);bottom:0;z-index:30;box-shadow:-10px 0 40px rgba(0,0,0,.5)}
@@ -418,6 +474,13 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
   .m{padding:3px 14px}.welcome{padding:22px 14px 14px}
   #comp{padding:0 10px 10px}
 }
+@media (max-width:700px){
+  #app{padding:var(--sat) 0 0;gap:0}
+  #side,#main{border-radius:0;border:0;box-shadow:none}
+  #rail{background:var(--bg0)}
+  .netpill{padding:0 10px;font-size:12px}
+  .m{margin:0 4px;padding:4px 10px}
+}
 </style>
 </head>
 <body class="nav">
@@ -437,6 +500,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
       <div class="t" id="ttl"></div>
       <div class="topic" id="topic"></div>
       <div class="sp1"></div>
+      <button class="netpill" id="netPill" title="Ver a conexão"></button>
       <button class="ib" id="callBtn" title="Iniciar chamada de voz"><svg class="i" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg></button>
       <button class="ib" id="vidBtn" title="Iniciar chamada de vídeo"><svg class="i" viewBox="0 0 24 24"><path d="m23 7-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
       <input id="search" placeholder="Buscar mensagens">
@@ -489,7 +553,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-5';
+const APP_VERSION='2026.11.14-06';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -558,18 +622,20 @@ let joinRoomFn=null,netOK=false;
 
 let saveT=null;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{
   for(const s of Object.values(DATA.servers))for(const ch in s.msgs){const ids=Object.keys(s.msgs[ch]);if(ids.length>600){ids.sort((a,b)=>s.msgs[ch][a].ts-s.msgs[ch][b].ts).slice(0,ids.length-600).forEach(i=>delete s.msgs[ch][i])}}
-  idb.set('data',DATA)},500)}
+  idb.set('data',DATA);if(typeof relayStateSoon==='function')relayStateSoon()},500)}
 
 const srv=()=>DATA.servers[V.srv];
 const chan=()=>srv()?.channels[V.ch];
-const profile=()=>({id:ME.id,name:ME.name,color:ME.color,about:ME.about||'',status:ME.status||'online',avatar:ME.avatar||'',ai:!!(ls.get('ai-key','')&&ls.get('ai-share',true)),v:ME.v||1});
+const profile=()=>({id:ME.id,name:ME.name,color:ME.color,about:ME.about||'',status:ME.status||'online',avatar:ME.avatar||'',ai:!!(ls.get('ai-key','')&&ls.get('ai-share',true)),ver:APP_VERSION,v:ME.v||1});
 const BOTS={'bot:ia':{id:'bot:ia',name:'Nexo IA',color:'#8b5cff',emoji:'✨',about:'Sou a IA do Nexo. Me chame com @IA seguido da sua pergunta.'},'bot:dj':{id:'bot:dj',name:'DJ Nexo',color:'#ff4f9a',emoji:'🎧',about:'Toco música para o servidor inteiro. Use /tocar e um link do YouTube.'}};
 const isBot=u=>String(u).startsWith('bot:');
 function member(u){if(BOTS[u])return BOTS[u];if(u===ME.id)return profile();for(const s of Object.values(DATA.servers))if(s.members[u])return s.members[u];return null}
 const nameOf=u=>member(u)?.name||'Alguém';
 const colorOf=u=>member(u)?.color||colorFor(u);
-function onlineUsers(code){const r=ROOMS[code];return new Set(r?Object.values(r.peers):[])}
-function isOnline(u){if(u===ME.id)return true;return Object.values(ROOMS).some(r=>Object.values(r.peers).includes(u))}
+function relayOnline(code,u){const t=RL.subs[code]?.seen[u];return !!t&&Date.now()-t<75000}
+function p2pOnline(code,u){const r=ROOMS[code];return !!r&&Object.values(r.peers).includes(u)}
+function onlineUsers(code){const r=ROOMS[code];const o=new Set(r?Object.values(r.peers):[]);for(const u in RL.subs[code]?.seen||{})if(relayOnline(code,u))o.add(u);return o}
+function isOnline(u){if(u===ME.id)return true;return Object.keys(DATA.servers).some(c=>p2pOnline(c,u)||relayOnline(c,u))}
 function statusOf(u){const m=member(u);if(u===ME.id)return ME.status==='invisivel'?'offline':(ME.status||'online');
   if(!isOnline(u)||!m||m.status==='invisivel')return 'offline';return m.status||'online'}
 function avatar(u,size,st,cls=''){const m=member(u);const n=m?.name||'?';
@@ -585,9 +651,96 @@ async function loadNet(){
   try{const mod=await import('https://esm.run/trystero@0.21.6/mqtt');NETMOD=mod;joinRoomFn=mod.joinRoom;netOK=true;banner('')}
   catch(e){console.error(e);banner('Não consegui carregar a conexão. Verifique sua internet e recarregue a página.',true)}}
 function banner(t,red){const b=$('#banner');b.textContent=t;b.classList.toggle('on',!!t);b.classList.toggle('red',!!red)}
+/* ---------------- canal de reserva ----------------
+   Além da conexão direta (WebRTC), todo servidor também conversa por um
+   "correio" MQTT criptografado com o código do servidor. Assim mensagens,
+   quem está online, jogos e música funcionam mesmo quando a conexão direta
+   falha, e quem entra recebe o servidor na hora, mesmo sem ninguém online. */
+const BROKERS=['wss://public:public@public.cloud.shiftr.io','wss://broker.hivemq.com:8884/mqtt','wss://broker.emqx.io:8084/mqtt','wss://test.mosquitto.org:8081/mqtt'];
+const RELAY_ACTS=new Set(['hello','msg','chan','meta','typing','vstate','react','bye','game','music','dm']);
+const SESSION=uid(10);
+const RL={mq:null,clients:[],subs:{},byTopic:{},seen:new Set(),lastState:{}};
+const _enc=new TextEncoder(),_dec=new TextDecoder();
+const _gz=async(data,dir)=>new Uint8Array(await new Response(new Blob([data]).stream().pipeThrough(dir?new CompressionStream('gzip'):new DecompressionStream('gzip'))).arrayBuffer());
+async function relayKeys(code){const h=async t=>new Uint8Array(await crypto.subtle.digest('SHA-256',_enc.encode(t)));
+  const id=[...await h('nexo-topico:'+code)].slice(0,12).map(b=>b.toString(16).padStart(2,'0')).join('');
+  const key=await crypto.subtle.importKey('raw',await h('nexo-chave:'+code),'AES-GCM',false,['encrypt','decrypt']);
+  return{live:'nexo3/'+id+'/ao-vivo',state:'nexo3/'+id+'/estado',key}}
+async function seal(key,obj){let data=_enc.encode(JSON.stringify(obj)),z=0;
+  if(data.length>600&&typeof CompressionStream!=='undefined'){data=await _gz(data,1);z=1}
+  const iv=crypto.getRandomValues(new Uint8Array(12));const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,data));
+  const out=new Uint8Array(13+ct.length);out[0]=z;out.set(iv,1);out.set(ct,13);return out}
+async function unseal(key,buf){const b=new Uint8Array(buf);if(b.length<14)return null;
+  let data=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:b.slice(1,13)},key,b.slice(13)));
+  if(b[0])data=await _gz(data,0);return JSON.parse(_dec.decode(data))}
+const relayUp=()=>RL.clients.filter(c=>c.connected).length;
+async function loadRelay(){if(RL.mq||!/^https?:$/.test(location.protocol))return;
+  try{const m=await import('https://esm.run/mqtt@5.10.1');RL.mq=m.default?.connect?m.default:m}catch(e){console.warn('reserva',e);return}
+  for(const url of BROKERS){let c;try{c=RL.mq.connect(url,{reconnectPeriod:5000,connectTimeout:12000,keepalive:30,clean:true,resubscribe:true})}catch(e){continue}
+    RL.clients.push(c);
+    c.on('connect',()=>{const t=[];for(const code in RL.subs)t.push(RL.subs[code].live,RL.subs[code].state);if(t.length)c.subscribe(t);netChanged();
+      clearTimeout(RL.hT);RL.hT=setTimeout(()=>{for(const k in RL.subs)relayHello(k)},500)});
+    c.on('close',netChanged);c.on('offline',netChanged);c.on('error',()=>{});
+    c.on('message',(topic,buf)=>relayRecv(topic,buf))}
+  for(const code in DATA.servers)relayJoin(code)}
+async function relayJoin(code){if(!RL.mq||RL.subs[code])return;const sub={seen:{},pending:true};RL.subs[code]=sub;
+  Object.assign(sub,await relayKeys(code));sub.pending=false;RL.byTopic[sub.live]=code;RL.byTopic[sub.state]=code;
+  for(const c of RL.clients)if(c.connected)c.subscribe([sub.live,sub.state]);
+  relayHello(code);setTimeout(()=>relayState(code),4000)}
+function relayLeave(code){const sub=RL.subs[code];if(!sub)return;delete RL.subs[code];delete RL.byTopic[sub.live];delete RL.byTopic[sub.state];
+  for(const c of RL.clients)try{c.unsubscribe([sub.live,sub.state])}catch(e){}}
+function relayKick(){for(const c of RL.clients)if(!c.connected)try{c.reconnect()}catch(e){}}
+async function relayPub(code,n,d,retain){const sub=RL.subs[code];if(!sub||sub.pending||!relayUp())return false;
+  const env={n,d,u:ME.id,s:SESSION,i:uid(12),t:Date.now()};let buf;try{buf=await seal(sub.key,env)}catch(e){return false}
+  if(buf.length>110000)return false; // grande demais (imagem): só pela conexão direta
+  for(const c of RL.clients)if(c.connected)try{c.publish(retain?sub.state:sub.live,buf,{qos:0,retain:!!retain})}catch(e){}
+  return true}
+async function relayRecv(topic,buf){const code=RL.byTopic[topic];const sub=RL.subs[code];if(!sub||!buf?.length)return;
+  let e;try{e=await unseal(sub.key,buf)}catch(err){return}
+  if(!e||!e.n||e.s===SESSION)return;
+  if(e.i){if(RL.seen.has(e.i))return;RL.seen.add(e.i);if(RL.seen.size>4000)RL.seen=new Set([...RL.seen].slice(-2000))}
+  if(!DATA.servers[code]||!e.u)return;
+  if(topic===sub.state){if(e.n==='sync')try{handle(code,'sync',e.d,'r:'+e.u)}catch(err){console.warn(err)}return}
+  if(e.u===ME.id&&e.n!=='msg')return;
+  const was=relayOnline(code,e.u);
+  if(e.u!==ME.id&&e.n!=='bye')sub.seen[e.u]=Date.now();
+  // quem acabou de aparecer recebe um "oi" nosso logo, para nos ver online também
+  if(e.n==='hello'&&!was&&e.d?.u?.id===e.u){clearTimeout(sub.helloT);sub.helloT=setTimeout(()=>relayHello(code),800+Math.random()*1200)}
+  try{handle(code,e.n,e.d,'r:'+e.u)}catch(err){console.warn(e.n,err)}
+  if(!was&&e.u!==ME.id)renderAll()}
+function relayHello(code){relayPub(code,'hello',{u:profile()})}
+// foto do servidor guardada no correio: quem entra recebe tudo na hora
+function statePayload(code,per){const d=syncPayload(code);const msgs={};
+  for(const ch in d.msgs)msgs[ch]=d.msgs[ch].slice(0,per).map(m=>m.img&&m.img.length>30000?{...m,img:'',imgOff:true}:m);
+  const members={};d.members[ME.id]={...profile(),seen:Date.now()};for(const u in d.members){const m=d.members[u];members[u]=m.avatar&&m.avatar.length>20000?{...m,avatar:''}:m}
+  return{...d,msgs,members,games:d.games.slice(0,per>30?25:8)}}
+async function relayState(code){const sub=RL.subs[code];const s=DATA.servers[code];if(!sub||sub.pending||!s||!relayUp()||!s.meta.v)return;
+  for(const per of[60,30,12,4]){const d=statePayload(code,per);const sig=JSON.stringify(d);
+    if(RL.lastState[code]===sig)return;
+    let buf;try{buf=await seal(sub.key,{n:'sync',d,u:ME.id,s:SESSION,i:uid(12),t:Date.now()})}catch(e){return}
+    if(buf.length>100000)continue;
+    for(const c of RL.clients)if(c.connected)try{c.publish(sub.state,buf,{qos:1,retain:true})}catch(e){}
+    RL.lastState[code]=sig;return}}
+let stateT=null;function relayStateSoon(){clearTimeout(stateT);stateT=setTimeout(()=>{for(const c in DATA.servers)relayState(c)},6000)}
+setInterval(()=>{for(const c in DATA.servers)relayHello(c)},25000);
+// presença expira sozinha quando alguém some
+setInterval(()=>{let ch=false;for(const c in RL.subs)for(const u in RL.subs[c].seen){const t=RL.subs[c].seen[u];if(Date.now()-t>75000&&Date.now()-t<87000)ch=true}if(ch)renderAll()},10000);
+// vigia: se a conexão caiu, reconecta sozinho
+let lastHidden=0,netBad=0;
+setInterval(()=>{if(!navigator.onLine)return;relayKick();
+  const any=Object.keys(DATA.servers).length;if(!any||CALL)return;
+  const sockOK=Object.values(NETMOD?.getRelaySockets?.()||{}).some(w=>w?.readyState===1);
+  netBad=sockOK||!joinRoomFn?0:netBad+1;if(netBad>=3){netBad=0;console.warn('reconectando');reconnectAll()}},20000);
+addEventListener('online',()=>{toast('Internet de volta. Reconectando…');setTimeout(()=>{if(!CALL)reconnectAll();else relayKick()},1200)});
+addEventListener('offline',netChanged);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){lastHidden=Date.now();return}
+  if(lastHidden&&Date.now()-lastHidden>4*60*1000&&!CALL)reconnectAll();else{relayKick();for(const c in DATA.servers)relayHello(c)}});
+function netState(){if(!navigator.onLine)return'off';if(relayUp()||Object.values(NETMOD?.getRelaySockets?.()||{}).some(w=>w?.readyState===1))return'ok';return netOK||RL.mq?'busy':'off'}
+let netT=null;function netChanged(){clearTimeout(netT);netT=setTimeout(()=>{renderTop();renderMe()},300)}
 const ACTIONS=['hello','sync','msg','chan','meta','typing','vstate','dm','react','bye','game','music','arena'];
-function connect(code){if(!joinRoomFn||ROOMS[code])return;
-  const room=joinRoomFn({appId:APP_ID,password:'nx-'+code,turnConfig:TURN},'srv-'+code,err=>{console.warn(err);toast('Problema ao conectar ao servidor')});
+function connect(code){if(!joinRoomFn){relayJoin(code);return}if(ROOMS[code])return;
+  relayJoin(code);
+  const room=joinRoomFn({appId:APP_ID,password:'nx-'+code,turnConfig:TURN,relayUrls:BROKERS,relayRedundancy:BROKERS.length},'srv-'+code,err=>console.warn('sala',err));
   const A={};const R={room,A,peers:{}};ROOMS[code]=R;
   for(const n of ACTIONS){const[s,g]=room.makeAction(n);A[n]=s;g((d,p)=>{try{handle(code,n,d,p)}catch(e){console.warn(n,e)}})}
   room.onPeerJoin(p=>greet(code,p));
@@ -595,11 +748,13 @@ function connect(code){if(!joinRoomFn||ROOMS[code])return;
     if(u&&VOICE[code]?.[u]?.peer===p){delete VOICE[code][u];if(CALL&&CALL.srv===code)sfx('leave')}renderAll()});
   room.onPeerStream((stream,p,meta)=>onStream(code,stream,p,meta));
 }
-function reconnectAll(){if(CALL)leaveCall(true);for(const code of Object.keys(ROOMS)){try{ROOMS[code].room.leave()}catch(e){}delete ROOMS[code];delete VOICE[code]}for(const code in DATA.servers)connect(code);renderAll()}
+function reconnectAll(){if(CALL)leaveCall(true);for(const code of Object.keys(ROOMS)){try{ROOMS[code].room.leave()}catch(e){}delete ROOMS[code];delete VOICE[code]}
+  relayKick();for(const code in DATA.servers)connect(code);for(const code in DATA.servers)relayHello(code);renderAll()}
 function greet(code,p){const R=ROOMS[code];if(!R)return;
   R.A.hello({u:profile()},p);R.A.sync(syncPayload(code),p);
   if(CALL&&CALL.srv===code)R.A.vstate(myV(),p)}
-function broadcast(code,n,d,target){const R=ROOMS[code];if(R)R.A[n](d,target??null)}
+function broadcast(code,n,d,target){const R=ROOMS[code];if(R)try{R.A[n](d,target??null)}catch(e){console.warn('envio',n,e)}
+  if(target==null&&RELAY_ACTS.has(n))relayPub(code,n,d)}
 function syncPayload(code){const s=DATA.servers[code];const msgs={};
   for(const ch in s.msgs){msgs[ch]=Object.values(s.msgs[ch]).sort((a,b)=>b.ts-a.ts).slice(0,120)}
   const games=Object.values(s.games||{}).sort((a,b)=>b.ts-a.ts).slice(0,40);
@@ -624,7 +779,11 @@ function mergeServerState(code,d,from){const s=DATA.servers[code];let ch=false;
   return ch}
 
 function handle(code,n,d,p){const s=DATA.servers[code];if(!s)return;const R=ROOMS[code];
-  const su=R.peers[p];if(su&&s.meta.kicked?.[su]&&n!=='hello')return; // ignora quem foi expulso
+  const isR=typeof p==='string'&&p.startsWith('r:');
+  const su=isR?p.slice(2):R?.peers[p];if(su&&s.meta.kicked?.[su]&&n!=='hello')return; // ignora quem foi expulso
+  if(isR&&n==='hello'){if(!d?.u?.id||d.u.id!==su)return;if(s.meta.kicked?.[su]){relayPub(code,'meta',s.meta);return}
+    const old=s.members[su];if(!old||(d.u.v||0)>=(old.v||0))s.members[su]={...d.u,seen:Date.now()};save();renderAll();return}
+  if(!isR&&!R)return;
   switch(n){
   case'hello':{if(!d?.u?.id)return;if(s.meta.kicked?.[d.u.id]){R.peers[p]=d.u.id;R.A.meta(s.meta,p);return}
     const first=!R.peers[p];R.peers[p]=d.u.id;const old=s.members[d.u.id];
@@ -640,19 +799,22 @@ function handle(code,n,d,p){const s=DATA.servers[code];if(!s)return;const R=ROOM
   case'meta':{if(acceptMeta(s,d,su)){save();if(checkKicked(code))return;renderAll();if(V.srv===code)renderMsgs(nearBottom())}break}
   case'music':{if((d?.v||0)>(s.music?.v||0)){s.music=d;save();if(code===UI.listenSrv)musicApply();else if(d.playing)autoListen(code);if(V.srv===code&&UI.panel==='music')renderPanel();renderVBar();renderMusicBar()}break}
   case'game':{if(mergeGame(s,d)){save();if(V.srv===code&&V.ch===d.ch)renderMsgs(nearBottom());arenaMaybeOpen(code,s.games[d.id])}break}
-  case'arena':{arenaMsg(R.peers[p],d);break}
+  case'arena':{if(!isR)arenaMsg(su,d);break}
   case'typing':{if(V.srv!==code||d.ch!==V.ch)return;UI.typing[d.u]=Date.now();renderTyping();break}
   case'react':{const m=s.msgs[d.ch]?.[d.mid];if(!m)return;m.reactions??={};m.reactions[d.e]??={};const a=m.reactions[d.e][d.u];
     if(!a||d.t>a.t){m.reactions[d.e][d.u]={on:d.on,t:d.t};save();if(V.srv===code&&V.ch===d.ch)renderMsgs(nearBottom())}break}
-  case'vstate':{const u=R.peers[p]||d.u;if(!u)return;if(!R.peers[p])R.peers[p]=u;onVState(code,u,p,d);break}
-  case'dm':{const from=R.peers[p];if(!from||!d?.id)return;const box=DATA.dms[from]??={msgs:{},read:0};
+  case'vstate':{if(isR){if(!su||p2pOnline(code,su))return;onVState(code,su,null,d);break}
+    const u=R.peers[p]||d.u;if(!u)return;if(!R.peers[p])R.peers[p]=u;onVState(code,u,p,d);break}
+  case'dm':{const from=su;if(!from||!d?.id||(isR&&d.to!==ME.id))return;const box=DATA.dms[from]??={msgs:{},read:0};
     if(d.del){delete box.msgs[d.id]}else{const cur=box.msgs[d.id];if(cur&&(cur.v||0)>=(d.v||0))return;const isNew=!cur;box.msgs[d.id]={...d,author:d.author===ME.id?ME.id:from};
       if(isNew&&d.author!==ME.id)notify(null,{...d,author:from,dm:true})}
     save();if(V.dm===from){renderMsgs(nearBottom());markRead()}else renderAll();break}
-  case'bye':{const u=R.peers[p];if(u)delete s.members[u];save();renderAll();break}
+  case'bye':{const u=su;if(u){delete s.members[u];if(RL.subs[code])delete RL.subs[code].seen[u]}save();renderAll();break}
   }}
 function sendDM(to,msg){let sent=false;for(const code in ROOMS){const R=ROOMS[code];const ps=Object.entries(R.peers).filter(([,u])=>u===to).map(([p])=>p);
-  if(ps.length){R.A.dm(msg,ps);sent=true;break}}return sent}
+  if(ps.length){R.A.dm(msg,ps);sent=true;break}}
+  if(!sent){const code=Object.keys(DATA.servers).find(c=>DATA.servers[c].members[to]&&RL.subs[c]);if(code){relayPub(code,'dm',{...msg,to});sent=relayOnline(code,to)}}
+  return sent}
 
 /* ---------------- expulsar ---------------- */
 const isOwner=(code=V.srv)=>DATA.servers[code]?.meta.owner===ME.id;
@@ -675,9 +837,9 @@ function createServer(name,icon,color){const code=uid(10);const s=newServerObj(c
 function joinServer(code){code=String(code).trim();const m=code.match(/entrar=([a-z0-9]+)/i);if(m)code=m[1];code=code.replace(/[^a-z0-9]/gi,'').toLowerCase();
   if(code.length<6){toast('Código de convite inválido');return}
   if(!DATA.servers[code]){const s=newServerObj(code,'Entrando…','⏳','#5b6472');s.meta.v=0;s.meta.owner='';DATA.servers[code]=s;save();
-    toast('Procurando o servidor… alguém que já está nele precisa estar online.')}
+    toast('Entrando no servidor…')}
   connect(code);openServer(code)}
-function leaveServer(code,quiet){if(CALL?.srv===code)leaveCall();if(!quiet)broadcast(code,'bye',{});const R=ROOMS[code];setTimeout(()=>{try{R?.room.leave()}catch(e){}},300);delete ROOMS[code];
+function leaveServer(code,quiet){if(CALL?.srv===code)leaveCall();if(!quiet)broadcast(code,'bye',{});const R=ROOMS[code];setTimeout(()=>{try{R?.room.leave()}catch(e){}relayLeave(code)},400);delete ROOMS[code];
   delete DATA.servers[code];delete VOICE[code];save();if(V.srv===code||!quiet)openHome();else renderAll()}
 function ensureCh(){const s=srv();if(!s)return;const c=s.channels[V.ch];if(!c||c.deleted)V.ch=sortedChans('text')[0]?.id||null}
 function sortedChans(type){const s=srv();if(!s)return[];return Object.values(s.channels).filter(c=>!c.deleted&&(c.type||'text')===type).sort((a,b)=>(a.order||0)-(b.order||0))}
@@ -734,7 +896,13 @@ function renderTop(){const vc=chan()?.type==='voice';
   else if(!V.srv){$('#ttl').innerHTML=`${ico('chat')}<span>Início</span>`;$('#topic').textContent=''}
   else if(!chan()){$('#ttl').textContent=srv().meta.name;$('#topic').textContent=''}
   else{const c=chan();$('#ttl').innerHTML=`${ico(vc?'vol':'hash')}<span>${esc(c.name)}</span>`;$('#topic').textContent=c.topic||(vc?'Canal de voz':'');$('#inp').placeholder='Conversar em #'+c.name}
-  $('#memBtn').classList.toggle('on',UI.showMem);$('#pinsBtn').classList.toggle('on',UI.panel==='pins')}
+  $('#memBtn').classList.toggle('on',UI.showMem);$('#pinsBtn').classList.toggle('on',UI.panel==='pins');renderNetPill()}
+function renderNetPill(){const el=$('#netPill');if(!el)return;const st=netState();
+  if(!V.srv){el.style.display='none';return}el.style.display='';
+  const n=onlineUsers(V.srv);n.delete(ME.id);const joining=!srv()?.meta.v;
+  let cls='ok',txt=n.size?`${n.size+1} online`:'Só você online';
+  if(st==='off'){cls='bad';txt='Sem conexão'}else if(st==='busy'){cls='wait';txt='Conectando…'}else if(joining){cls='wait';txt='Procurando o servidor…'}
+  el.className='netpill '+cls;el.innerHTML=`<span></span>${txt}`}
 function renderMain(){const vc=V.srv&&chan()?.type==='voice';const home=!V.srv&&!V.dm;
   $('#home').classList.toggle('on',home);$('#call').classList.toggle('on',!!vc);$('#chat').style.display=home||vc?'none':'flex';
   $('#comp').style.display=(V.dm||(V.ch&&!vc))?'':'none';
@@ -749,7 +917,8 @@ function renderMem(){const m=$('#mem');const show=UI.showMem&&!!V.srv;m.classLis
   const on=all.filter(u=>statusOf(u)!=='offline'),off=all.filter(u=>statusOf(u)==='offline');
   const row=u=>{const mm=member(u);const v=VOICE[V.srv]?.[u]||(u===ME.id&&CALL?.srv===V.srv?{ch:CALL.ch}:null);
     const sub=v?.ch?'🔊 '+(s.channels[v.ch]?.name||'voz'):(mm?.about||'').split('\n')[0];
-    return `<div class="mr ${statusOf(u)==='offline'?'off':''}" data-user="${esc(u)}">${avatar(u,34,true)}<div style="min-width:0;flex:1"><div class="nm" style="color:${colorOf(u)}">${esc(nameOf(u))} ${s.meta.owner===u?'<span class="crown" title="Dono">👑</span>':''}</div>${sub?`<div class="sub">${esc(sub)}</div>`:''}</div></div>`};
+    const old=u!==ME.id&&!isBot(u)&&statusOf(u)!=='offline'&&(!mm?.ver||mm.ver<APP_VERSION);
+    return `<div class="mr ${statusOf(u)==='offline'?'off':''}" data-user="${esc(u)}">${avatar(u,34,true)}<div style="min-width:0;flex:1"><div class="nm" style="color:${colorOf(u)}">${esc(nameOf(u))} ${s.meta.owner===u?'<span class="crown" title="Dono">👑</span>':''}</div>${old?`<div class="sub oldv" title="Peça para fechar e abrir o Nexo de novo">App desatualizado</div>`:sub?`<div class="sub">${esc(sub)}</div>`:''}</div></div>`};
   m.innerHTML=`<div class="mg">Online — ${on.length}</div>${on.map(row).join('')}${off.length?`<div class="mg">Offline — ${off.length}</div>${off.map(row).join('')}`:''}`}
 function renderHome(){const n=Object.keys(DATA.servers).length;
   $('#home').innerHTML=`<div class="hero"><div class="logo">N</div><h1>E aí, ${esc(ME.name)}!</h1>
@@ -790,7 +959,7 @@ function msgHTML(m,first,compact){const mine=m.author===ME.id;
     <div class="c">${reply}${head?`<div class="h"><span class="a" data-user="${esc(m.author)}" style="color:${colorOf(m.author)}">${esc(nameOf(m.author))}</span>${isBot(m.author)?'<span class="bottag">BOT</span>':''}<span class="tm">${fmtDay(m.ts)} às ${fmtTime(m.ts)}</span>${m.pinned?`<span style="color:var(--yel);font-size:11px">📌 fixada</span>`:''}</div>`:''}
     ${body}${rs.length?`<div class="reacts">${rs.map(([e,us])=>`<button class="rc ${us.includes(ME.id)?'mine':''}" data-rq="${esc(m.id)}" data-e="${esc(e)}" title="${esc(us.map(nameOf).join(', '))}">${e} <span>${us.length}</span></button>`).join('')}<button class="rc" data-react="${esc(m.id)}" title="Adicionar reação">${ico('smile').replace('class="i"','class="i" style="width:15px;height:15px"')}</button></div>`:''}</div></div>`}
 function nearBottom(){const e=$('#msgs');return e.scrollHeight-e.scrollTop-e.clientHeight<150}
-function renderMsgs(stick=true){const e=$('#msgs');if(!V.dm&&(!V.srv||!V.ch||chan()?.type==='voice')){if(V.srv&&!V.ch)e.innerHTML=`<div class="welcome"><div class="big">${ico('hash')}</div><h2>Nenhum canal</h2><p>Crie um canal de texto com o ＋ na lateral.</p></div>`;renderPanel();return}
+function renderMsgs(stick=true){const e=$('#msgs');if(!V.dm&&(!V.srv||!V.ch||chan()?.type==='voice')){if(V.srv&&!V.ch)e.innerHTML=!srv().meta.v?`<div class="welcome joinwait"><div class="big spin">⏳</div><h2>Entrando no servidor…</h2><p>Estou buscando as conversas deste servidor. Normalmente leva só alguns segundos.</p><p class="sub2">Se demorar mais de um minuto, confira se o link está completo, ou peça para alguém que já está no servidor abrir o Nexo.</p></div>`:`<div class="welcome"><div class="big">${ico('hash')}</div><h2>Nenhum canal</h2><p>Crie um canal de texto com o ＋ na lateral.</p></div>`;renderPanel();return}
   let h='';
   if(V.dm){h+=`<div class="welcome">${avatar(V.dm,80)}<h2 style="margin-top:14px">${esc(nameOf(V.dm))}</h2><p>Este é o começo da sua conversa direta com <b>${esc(nameOf(V.dm))}</b>. As mensagens chegam quando vocês dois estão online.</p></div>`}
   else{const c=chan();h+=`<div class="welcome"><div class="big">${ico('hash')}</div><h2>Bem-vindo a #${esc(c.name)}!</h2><p>Este é o começo do canal #${esc(c.name)}.${c.topic?' '+esc(c.topic):''}</p></div>`}
@@ -1208,7 +1377,7 @@ function sendMyStreams(peers){if(!CALL||!peers.length)return;const R=ROOMS[CALL.
   if(CALL.screen)R.room.addStream(CALL.screen,peers,{k:'screen'})}
 function onVState(code,u,p,d){VOICE[code]??={};const prev=VOICE[code][u];const st={...d,peer:p};
   if(d.ch)VOICE[code][u]=st;else delete VOICE[code][u];
-  if(CALL&&CALL.srv===code){const wasIn=prev&&prev.ch===CALL.ch,isIn=d.ch===CALL.ch;
+  if(CALL&&CALL.srv===code&&p){const wasIn=prev&&prev.ch===CALL.ch&&prev.peer===p,isIn=d.ch===CALL.ch;
     if(isIn&&!wasIn){sendMyStreams([p]);sfx('join')}
     if(wasIn&&!isIn){dropRemote(p);sfx('leave');const R=ROOMS[code];for(const s of[CALL.mic,CALL.cam,CALL.screen])if(s)try{R.room.removeStream(s,[p])}catch(e){}}
     if(isIn){if(!d.cam&&REMOTE[p]?.cam){delete REMOTE[p].cam}if(!d.screen&&REMOTE[p]?.screen){delete REMOTE[p].screen}}}
@@ -1377,7 +1546,8 @@ function joinModal(){modal(`<h3>Entrar em um servidor</h3><p class="sub">Cole o 
     md.querySelector('#f').onsubmit=e=>{e.preventDefault();closeModal();joinServer(md.querySelector('#c').value)}})}
 function inviteLink(code){return location.origin+location.pathname+'#entrar='+code}
 function inviteModal(){const s=srv();if(!s)return;const link=inviteLink(s.code);
-  modal(`<h3>Convide amigos para ${esc(s.meta.name)}</h3><p class="sub">Mande este link. Quem abrir entra direto no servidor. Para ver o histórico, pelo menos uma pessoa do servidor precisa estar online.</p>
+  modal(`<h3>Convide amigos para ${esc(s.meta.name)}</h3><p class="sub">Mande este link. Quem abrir entra direto no servidor, já com as conversas.</p>
+  <a class="btn wa" id="wa" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(`Entra no meu servidor "${s.meta.name}" no Nexo: ${link}`)}">Mandar pelo WhatsApp</a>
   <label>Link de convite</label><div class="copyrow"><input id="l" readonly value="${esc(link)}"><button class="btn" id="cp">Copiar</button></div>
   <label>Ou o código</label><div class="copyrow"><input readonly value="${esc(s.code)}" style="font-family:'JetBrains Mono',monospace;letter-spacing:2px"></div>
   ${location.protocol==='file:'?'<p class="sub" style="color:var(--yel);margin-top:12px">⚠️ Você abriu o Nexo como arquivo. Para o link funcionar para os amigos, publique o Nexo num site (veja as instruções).</p>':''}
@@ -1447,11 +1617,11 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
    <label>Notificações</label>${np==='granted'?'<p class="sub">✅ Ativadas neste aparelho</p>':np==='unsupported'?'<p class="sub">Seu navegador não suporta.</p>':`<button type="button" class="btn s" id="np">${ico('bell')} Ativar notificações</button>`}
    ${chk('sf','sfx-on','Sons de mensagem e chamada')}${chk('nt','notif','Mostrar notificação quando o Nexo estiver em segundo plano')}`;
   if(setTab==='net'){let rel={open:0,total:0};try{for(const ws of Object.values(NETMOD?.getRelaySockets?.()||{})){rel.total++;if(ws.readyState===1)rel.open++}}catch(e){}
-    const rows=Object.values(DATA.servers).map(sv=>{const R=ROOMS[sv.code];const n=R?Object.keys(R.peers).length:0;const pc=R?Object.values(R.room.getPeers?.()||{}):[];
-      const st=pc.map(c=>c?.connectionState||c?.iceConnectionState||'?');
-      return `<div class="opt" style="cursor:default"><div style="font-size:20px">${n?'🟢':'🔴'}</div><div style="flex:1"><b>${esc(sv.meta.name)}</b><small>${n} ${n===1?'pessoa conectada':'pessoas conectadas'} com você${st.length?' · '+st.join(', '):''}<br>Código: ${esc(sv.code)}</small></div></div>`}).join('')||'<p class="sub">Você ainda não está em nenhum servidor.</p>';
+    const rows=Object.values(DATA.servers).map(sv=>{const R=ROOMS[sv.code];const on=onlineUsers(sv.code);on.delete(ME.id);
+      const direct=[...on].filter(u=>p2pOnline(sv.code,u)).length;const names=[...on].map(u=>esc(nameOf(u))+(p2pOnline(sv.code,u)?'':' (só reserva)')).join(', ');
+      return `<div class="opt" style="cursor:default"><div style="font-size:20px">${on.size?'🟢':'⚪'}</div><div style="flex:1"><b>${esc(sv.meta.name)}</b><small>${on.size?`Online agora: ${names}`:'Ninguém mais online agora'}${on.size?` · ${direct} com conexão direta (chamadas)`:''}<br>Código: ${esc(sv.code)}</small></div></div>`}).join('')||'<p class="sub">Você ainda não está em nenhum servidor.</p>';
     body=`<p class="sub" style="margin-top:12px">Use esta tela para descobrir por que alguém não aparece. Os dois precisam ver o <b>mesmo código</b> do servidor e o mesmo endereço do app.</p>
-     <div class="opt" style="cursor:default"><div style="font-size:20px">${rel.open?'🟢':'🔴'}</div><div><b>Servidores de encontro</b><small>${rel.open} de ${rel.total} funcionando. Com 0, ninguém consegue se encontrar.</small></div></div>
+     <div class="opt" style="cursor:default"><div style="font-size:20px">${rel.open||relayUp()?'🟢':'🔴'}</div><div><b>Servidores de encontro</b><small>Chamadas: ${rel.open} de ${rel.total} · Mensagens: ${relayUp()} de ${RL.clients.length||BROKERS.length}. Basta 1 funcionando.</small></div></div>
      <div class="opt" style="cursor:default"><div style="font-size:20px">${CAPS.turn?'🟢':'⚪'}</div><div><b>Apoio para chamadas (TURN)</b><small>${CAPS.turn?'Ligado':'Desligado — ajuda quando a internet bloqueia conexão direta'}</small></div></div>
      <div class="opt" style="cursor:default"><div style="font-size:20px">🌐</div><div><b>Endereço do app</b><small>${esc(location.host)} · versão ${APP_VERSION}</small></div></div>
      <label>Servidores</label>${rows}
@@ -1598,6 +1768,7 @@ $('#memBtn').onclick=()=>{UI.showMem=!UI.showMem;ls.set('mem',UI.showMem);render
 $('#musicBtn').onclick=()=>{UI.panel=UI.panel==='music'?null:'music';renderPanel();renderTop()};
 $('#pinsBtn').onclick=()=>{UI.panel=UI.panel==='pins'?null:'pins';renderPanel();renderTop()};
 $('#inviteBtn').onclick=()=>inviteModal();
+$('#netPill').onclick=()=>settingsModal('net');
 $('#callBtn').onclick=()=>dmCall(false);$('#vidBtn').onclick=()=>dmCall(true);
 $('#panelX').onclick=()=>{UI.panel=null;renderPanel();renderTop()};
 $('#search').addEventListener('keydown',e=>{if(e.key==='Enter'){UI.query=e.target.value.trim();UI.panel=UI.query?'search':null;renderPanel();renderTop()}});
@@ -1659,7 +1830,7 @@ async function start(){
   renderAll();renderMsgs(true);
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   banner(location.protocol==='file:'?$('#banner').textContent:'Conectando…');
-  await Promise.all([loadNet(),loadTurn()]);loadCaps();setTimeout(checkUpdate,8000);
+  await Promise.all([loadNet(),loadTurn(),loadRelay()]);loadCaps();setTimeout(checkUpdate,8000);
   if(location.protocol==='file:')banner('Você abriu o Nexo como arquivo. Para chamadas e convites funcionarem, publique-o num site (https).');
   for(const code in DATA.servers)connect(code);
   if(UI.listenSrv&&!DATA.servers[UI.listenSrv]){UI.listenSrv=null;ls.set('listen',null)}renderMusicBar();
