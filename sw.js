@@ -1,5 +1,5 @@
 // Nexo — service worker: deixa o app instalável, abre mais rápido e mostra notificações.
-const CACHE = 'nexo-v13';
+const CACHE = 'nexo-v14';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable.png'];
 const CDN = ['esm.run', 'cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 

@@ -553,7 +553,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-06';
+const APP_VERSION='2026.11.14-07';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -1394,9 +1394,12 @@ async function joinCall(code,ch,withCam){if(!netOK){toast('Sem conexão com a re
   if(!navigator.mediaDevices?.getUserMedia){toast('Seu navegador não permite chamadas aqui. Abra o Nexo por um link https.');return}
   if(CALL&&CALL.srv===code&&CALL.ch===ch){if(withCam&&!CALL.cam)toggleCam();return}
   if(CALL)leaveCall(true);
-  let mic;try{mic=await getMic()}
-  catch(e){toast(e.name==='NotAllowedError'?'Você precisa permitir o microfone para entrar na chamada.':'Não encontrei um microfone.');return}
-  CALL={srv:code,ch,mic,cam:null,screen:null,mute:false,deaf:false};ac()?.resume?.();
+  let mic,noMic=false;try{mic=await getMic()}
+  catch(e){console.warn('mic',e);
+    // sem microfone ainda dá para entrar: ouvindo, com câmera e tela
+    try{const a=ac()||new AudioContext();const d=a.createMediaStreamDestination();mic=d.stream;noMic=true}catch(x){toast('Não consegui abrir o microfone.');return}
+    toast(e.name==='NotAllowedError'?'Microfone bloqueado: você entrou só ouvindo. Libere o microfone no cadeado ao lado do endereço.':e.name==='NotReadableError'?'O microfone está sendo usado por outro programa. Você entrou só ouvindo.':'Não encontrei um microfone. Você entrou só ouvindo.')}
+  CALL={srv:code,ch,mic,cam:null,screen:null,mute:noMic,noMic,deaf:false};ac()?.resume?.();
   watchLevel('me',mic);broadcast(code,'vstate',myV());sendMyStreams(callPeers());sfx('join');
   if(withCam)await toggleCam();
   if(V.srv!==code||V.ch!==ch){V.srv=code;V.dm=null;openChannel(ch)}else renderAll()}
@@ -1405,13 +1408,13 @@ function leaveCall(silent){if(!CALL)return;const R=ROOMS[CALL.srv];const peers=c
   const code=CALL.srv;CALL=null;broadcast(code,'vstate',{u:ME.id,ch:null});
   for(const p of Object.keys(REMOTE))dropRemote(p);levels.delete('me');speaking.delete(ME.id);
   tileEls.forEach(el=>el.remove());tileEls.clear();UI.focus=null;if(!silent)sfx('leave');renderAll()}
-function toggleMute(){if(!CALL)return;CALL.mute=!CALL.mute;if(!CALL.mute&&CALL.deaf)CALL.deaf=false,applyDeaf();CALL.mic.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);sfx(CALL.mute?'leave':'join');broadcast(CALL.srv,'vstate',myV());renderAll()}
+function toggleMute(){if(!CALL)return;if(CALL.noMic){toast('Você entrou sem microfone. Libere o microfone, saia da chamada e entre de novo.');return}CALL.mute=!CALL.mute;if(!CALL.mute&&CALL.deaf)CALL.deaf=false,applyDeaf();CALL.mic.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);sfx(CALL.mute?'leave':'join');broadcast(CALL.srv,'vstate',myV());renderAll()}
 function toggleDeaf(){if(!CALL)return;CALL.deaf=!CALL.deaf;if(CALL.deaf){CALL._wasMuted=CALL.mute;CALL.mute=true}else CALL.mute=!!CALL._wasMuted;
   CALL.mic.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);applyDeaf();broadcast(CALL.srv,'vstate',myV());renderAll()}
 async function toggleCam(){if(!CALL)return;const R=ROOMS[CALL.srv];
   if(CALL.cam){const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());CALL.cam=null}
-  else{try{CALL.cam=await getCam()}catch(e){toast('Não consegui abrir a câmera. Verifique a permissão.');return}
-    const peers=callPeers();if(peers.length)R.room.addStream(CALL.cam,peers,{k:'cam'})}
+  else{try{CALL.cam=await getCam()}catch(e){console.warn('camera',e);alertModal('Câmera',camErrorMsg(e));return}
+    const peers=callPeers();if(peers.length)try{R.room.addStream(CALL.cam,peers,{k:'cam'})}catch(e){console.warn(e)}}
   broadcast(CALL.srv,'vstate',myV());renderAll()}
 async function toggleScreen(){if(!CALL)return;const R=ROOMS[CALL.srv];
   if(CALL.screen){const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.screen,peers)}catch(e){}CALL.screen.getTracks().forEach(t=>t.stop());CALL.screen=null}
@@ -1430,8 +1433,21 @@ const pref=k=>ls.get('dev:'+k,'');
 function audioC(){const c={echoCancellation:ls.get('echo',true),noiseSuppression:ls.get('ns',true),autoGainControl:ls.get('agc',true)};if(pref('mic'))c.deviceId={exact:pref('mic')};return c}
 async function getMic(){try{return await navigator.mediaDevices.getUserMedia({audio:audioC(),video:false})}
   catch(e){if(pref('mic')&&(e.name==='OverconstrainedError'||e.name==='NotFoundError')){ls.set('dev:mic','');toast('O microfone escolhido não foi encontrado. Usando o padrão.');return navigator.mediaDevices.getUserMedia({audio:audioC(),video:false})}throw e}}
-async function getCam(){const c={width:{ideal:1280},height:{ideal:720}};if(pref('cam'))c.deviceId={exact:pref('cam')};else c.facingMode='user';
-  try{return await navigator.mediaDevices.getUserMedia({video:c,audio:false})}catch(e){if(pref('cam')){ls.set('dev:cam','');return navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false})}throw e}}
+async function getCam(){const gum=v=>navigator.mediaDevices.getUserMedia({video:v,audio:false});
+  const hd={width:{ideal:1280},height:{ideal:720}};let first;
+  // tenta em ordem: câmera escolhida, padrão em HD, padrão simples, depois cada câmera do PC
+  const tries=[];if(pref('cam'))tries.push({...hd,deviceId:{exact:pref('cam')}});tries.push(hd,true);
+  for(const t of tries){try{return await gum(t)}catch(e){first??=e;if(e.name==='NotAllowedError'||e.name==='SecurityError')throw e}}
+  try{const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==='videoinput'&&d.deviceId);
+    for(const d of devs){try{const st=await gum({deviceId:{exact:d.deviceId}});ls.set('dev:cam',d.deviceId);return st}catch(e){}}
+    if(!devs.length&&first?.name!=='NotReadableError')first=Object.assign(new Error('sem câmera'),{name:'NotFoundError'})}catch(e){}
+  throw first}
+function alertModal(t,msg){modal(`<h3>${esc(t)}</h3><p class="sub">${esc(msg)}</p><div class="row"><button class="btn" data-close>Ok</button></div>`)}
+function camErrorMsg(e){const n=e?.name;
+  if(n==='NotAllowedError'||n==='SecurityError')return 'A câmera está bloqueada para o Nexo. Clique no cadeado ao lado do endereço (ou nos ⋯ do app → Configurações do app) e deixe a Câmera em "Permitir".';
+  if(n==='NotReadableError'||n==='AbortError'||n==='TrackStartError')return 'A câmera está sendo usada por outro programa (Discord, Zoom, OBS, Teams…). Feche ele e tente de novo. Se não tiver nenhum aberto, veja no Windows: Configurações → Privacidade e segurança → Câmera, e ligue "Permitir que aplicativos acessem a câmera".';
+  if(n==='NotFoundError'||n==='OverconstrainedError'||n==='DevicesNotFoundError')return 'Não encontrei nenhuma câmera. Veja se ela está conectada e ligada (alguns notebooks têm uma tecla ou tampinha na câmera).';
+  return 'Não consegui abrir a câmera ('+(n||'erro')+'). Feche outros programas que usam a câmera e tente de novo.'}
 function applySink(el){const id=pref('out');if(el&&el.setSinkId&&id)el.setSinkId(id).catch(()=>{})}
 function applyVolumes(){const vols=ls.get('vols',{});const master=ls.get('outvol',100)/100;
   for(const a of document.querySelectorAll('#audios audio')){const p=a.id.slice(3);const u=CALL?ROOMS[CALL.srv]?.peers[p]:null;const v=((vols[u]??100)/100)*master;a.volume=Math.min(1,v);
