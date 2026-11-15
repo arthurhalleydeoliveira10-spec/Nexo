@@ -557,7 +557,7 @@ input[type=range]:disabled{opacity:.4}
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.15-02';
+const APP_VERSION='2026.11.15-03';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -654,6 +654,21 @@ async function loadTurn(){if(!/^https?:$/.test(location.protocol))return;
 async function loadNet(){
   try{const mod=await import('https://esm.run/trystero@0.21.6/mqtt');NETMOD=mod;joinRoomFn=mod.joinRoom;netOK=true;banner('')}
   catch(e){console.error(e);banner('Não consegui carregar a conexão. Verifique sua internet e recarregue a página.',true)}}
+/* O Trystero tem um defeito: depois de sair de uma sala (leave), ele para de
+   renovar as ofertas de conexão e as próximas conexões diretas falham.
+   Por isso, sempre que for preciso refazer as salas, carregamos uma cópia nova
+   e limpa dele, em vez de sair e entrar de novo na mesma. */
+let NETGEN=0;
+async function freshNet(){if(NETGEN>=8)return false;
+  try{const mod=await import(`https://cdn.jsdelivr.net/npm/trystero@0.21.6/mqtt/+esm?nova=${++NETGEN}`);NETMOD=mod;joinRoomFn=mod.joinRoom;netOK=true;return true}
+  catch(e){console.warn('cópia nova da conexão falhou',e);return false}}
+let freshing=null;
+function freshRooms(){return freshing??=(async()=>{
+  try{await freshNet();
+    for(const code of Object.keys(ROOMS)){const R=ROOMS[code];for(const p of Object.keys(R.peers))dropRemote(p);
+      for(const u in VOICE[code]||{})if(VOICE[code][u].peer)VOICE[code][u].peer=null;
+      try{R.room.leave()}catch(e){}delete ROOMS[code]}
+    for(const code in DATA.servers)connect(code);renderAll()}finally{freshing=null}})()}
 function banner(t,red){const b=$('#banner');b.textContent=t;b.classList.toggle('on',!!t);b.classList.toggle('red',!!red)}
 /* ---------------- canal de reserva ----------------
    Além da conexão direta (WebRTC), todo servidor também conversa por um
@@ -729,10 +744,7 @@ async function relayState(code){const sub=RL.subs[code];const s=DATA.servers[cod
    conexão direta (que leva voz, câmera e tela) não volta. Refaz só a sala,
    sem derrubar a chamada. */
 const healSince={},lastHeal={};
-function rejoinRoom(code){const R=ROOMS[code];if(!R)return;console.warn('refazendo a conexão direta',code);
-  for(const p of Object.keys(R.peers))dropRemote(p);
-  for(const u in VOICE[code]||{})if(VOICE[code][u].peer)VOICE[code][u].peer=null;
-  try{R.room.leave()}catch(e){}delete ROOMS[code];connect(code);renderAll()}
+function rejoinRoom(code){if(!ROOMS[code])return;console.warn('refazendo a conexão direta',code);freshRooms()}
 setInterval(()=>{const now=Date.now();
   for(const code in DATA.servers){const s=DATA.servers[code];if(!ROOMS[code]||!RL.subs[code])continue;
     // só conta quem tem a versão nova (fala pelo canal de reserva)
@@ -775,8 +787,8 @@ function connect(code){if(!joinRoomFn){relayJoin(code);return}if(ROOMS[code])ret
     if(u&&VOICE[code]?.[u]?.peer===p){if(relayOnline(code,u))VOICE[code][u].peer=null;else{delete VOICE[code][u];if(CALL&&CALL.srv===code)sfx('leave')}}renderAll()});
   room.onPeerStream((stream,p,meta)=>onStream(code,stream,p,meta));
 }
-function reconnectAll(){if(CALL)leaveCall(true);for(const code of Object.keys(ROOMS)){try{ROOMS[code].room.leave()}catch(e){}delete ROOMS[code];delete VOICE[code]}
-  relayKick();for(const code in DATA.servers)connect(code);for(const code in DATA.servers)relayHello(code);renderAll()}
+async function reconnectAll(){if(CALL)leaveCall(true);for(const code of Object.keys(VOICE))delete VOICE[code];
+  relayKick();await freshRooms();for(const code in DATA.servers)relayHello(code);renderAll()}
 function greet(code,p){const R=ROOMS[code];if(!R)return;
   R.A.hello({u:profile()},p);R.A.sync(syncPayload(code),p);
   if(CALL&&CALL.srv===code)R.A.vstate(myV(),p)}
@@ -867,7 +879,7 @@ function joinServer(code){code=String(code).trim();const m=code.match(/entrar=([
   if(!DATA.servers[code]){const s=newServerObj(code,'Entrando…','⏳','#5b6472');s.meta.v=0;s.meta.owner='';DATA.servers[code]=s;save();
     toast('Entrando no servidor…')}
   connect(code);openServer(code)}
-function leaveServer(code,quiet){if(CALL?.srv===code)leaveCall();if(!quiet)broadcast(code,'bye',{});const R=ROOMS[code];setTimeout(()=>{try{R?.room.leave()}catch(e){}relayLeave(code)},400);delete ROOMS[code];
+function leaveServer(code,quiet){if(CALL?.srv===code)leaveCall();if(!quiet)broadcast(code,'bye',{});const R=ROOMS[code];setTimeout(()=>{try{R?.room.leave()}catch(e){}relayLeave(code);if(Object.keys(ROOMS).length)setTimeout(freshRooms,800)},400);delete ROOMS[code];
   delete DATA.servers[code];delete VOICE[code];save();if(V.srv===code||!quiet)openHome();else renderAll()}
 function ensureCh(){const s=srv();if(!s)return;const c=s.channels[V.ch];if(!c||c.deleted)V.ch=sortedChans('text')[0]?.id||null}
 function sortedChans(type){const s=srv();if(!s)return[];return Object.values(s.channels).filter(c=>!c.deleted&&(c.type||'text')===type).sort((a,b)=>(a.order||0)-(b.order||0))}
@@ -1407,14 +1419,15 @@ function voiceUsers(code,ch){const out=[];for(const[u,v]of Object.entries(VOICE[
 function myV(){return CALL?{u:ME.id,ch:CALL.ch,mute:CALL.mute,deaf:CALL.deaf,cam:!!CALL.cam,screen:!!CALL.screen}:{u:ME.id,ch:null}}
 function callPeers(){if(!CALL)return[];const R=ROOMS[CALL.srv];if(!R)return[];return Object.entries(VOICE[CALL.srv]||{}).filter(([,v])=>v.ch===CALL.ch&&R.peers[v.peer]).map(([,v])=>v.peer)}
 function sendMyStreams(peers){if(!CALL||!peers.length)return;const R=ROOMS[CALL.srv];if(!R)return;
-  if(CALL.mic)R.room.addStream(CALL.mic,peers,{k:'mic'});
-  if(CALL.cam)R.room.addStream(CALL.cam,peers,{k:'cam'});
-  if(CALL.screen)R.room.addStream(CALL.screen,peers,{k:'screen'})}
+  // não manda o mesmo áudio/vídeo duas vezes para a mesma conexão
+  CALL.sent??=new WeakMap();
+  for(const[k,st]of[['mic',CALL.mic],['cam',CALL.cam],['screen',CALL.screen]]){if(!st)continue;let done=CALL.sent.get(st);if(!done)CALL.sent.set(st,done=new Set());
+    const to=peers.filter(p=>!done.has(p));if(!to.length)continue;try{R.room.addStream(st,to,{k});to.forEach(p=>done.add(p))}catch(e){console.warn('envio de',k,e)}}}
 function onVState(code,u,p,d){VOICE[code]??={};const prev=VOICE[code][u];const st={...d,peer:p};
   if(d.ch)VOICE[code][u]=st;else delete VOICE[code][u];
   if(CALL&&CALL.srv===code&&p){const wasIn=prev&&prev.ch===CALL.ch&&prev.peer===p,isIn=d.ch===CALL.ch;
     if(isIn&&!wasIn){sendMyStreams([p]);sfx('join')}
-    if(wasIn&&!isIn){dropRemote(p);sfx('leave');const R=ROOMS[code];for(const s of[CALL.mic,CALL.cam,CALL.screen])if(s)try{R.room.removeStream(s,[p])}catch(e){}}
+    if(wasIn&&!isIn){dropRemote(p);sfx('leave');const R=ROOMS[code];for(const s of[CALL.mic,CALL.cam,CALL.screen])if(s){try{R.room.removeStream(s,[p])}catch(e){}CALL.sent?.get(s)?.delete(p)}}
     if(isIn){if(!d.cam&&REMOTE[p]?.cam){delete REMOTE[p].cam}if(!d.screen&&REMOTE[p]?.screen){delete REMOTE[p].screen}}}
   applyDeaf();renderSide();renderMem();if(V.srv===code&&chan()?.type==='voice')renderCall();renderVBar()}
 function onStream(code,stream,p,meta){const k=meta?.k||(stream.getVideoTracks().length?'cam':'mic');
@@ -1449,7 +1462,7 @@ function toggleDeaf(){if(!CALL)return;CALL.deaf=!CALL.deaf;if(CALL.deaf){CALL._w
 async function toggleCam(){if(!CALL)return;const R=ROOMS[CALL.srv];
   if(CALL.cam){const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());CALL.cam=null}
   else{try{CALL.cam=await getCam()}catch(e){console.warn('camera',e);alertModal('Câmera',camErrorMsg(e));return}
-    const peers=callPeers();if(peers.length)try{ROOMS[CALL.srv]?.room.addStream(CALL.cam,peers,{k:'cam'})}catch(e){console.warn(e)}}
+    const peers=callPeers();sendMyStreams(callPeers())}
   broadcast(CALL.srv,'vstate',myV());renderAll()}
 async function toggleScreen(){if(!CALL)return;const R=ROOMS[CALL.srv];
   if(CALL.screen){const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.screen,peers)}catch(e){}CALL.screen.getTracks().forEach(t=>t.stop());CALL.screen=null}
@@ -1460,14 +1473,14 @@ async function toggleScreen(){if(!CALL)return;const R=ROOMS[CALL.srv];
     if(!CALL?.screen)return;
     CALL.screen.getVideoTracks().forEach(t=>{try{t.contentHint='detail'}catch(e){}});
     CALL.screen.getVideoTracks()[0].addEventListener('ended',()=>{if(CALL?.screen)toggleScreen()});
-    const peers=callPeers();if(peers.length)try{ROOMS[CALL.srv]?.room.addStream(CALL.screen,peers,{k:'screen'})}catch(e){console.warn(e)};UI.focus='me:screen'}
+    const peers=callPeers();sendMyStreams(callPeers());UI.focus='me:screen'}
   broadcast(CALL.srv,'vstate',myV());renderAll()}
 function screenErr(e){if(/system/i.test(e?.message||''))return 'O Windows/Mac bloqueou a captura de tela para o navegador. No Mac: Ajustes → Privacidade → Gravação de Tela. No Windows, feche programas de proteção que bloqueiam captura e tente de novo.';
   return 'Não consegui compartilhar a tela ('+(e?.name||'erro')+'). Tente escolher uma janela ou aba em vez da tela inteira.'}
 async function switchCam(){if(!CALL?.cam)return;const cur=CALL.cam.getVideoTracks()[0]?.getSettings?.().facingMode;const R=ROOMS[CALL.srv];
   let ns;try{ns=await navigator.mediaDevices.getUserMedia({video:{facingMode:cur==='environment'?'user':'environment'},audio:false})}catch(e){toast('Não deu para trocar a câmera');return}
   const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());
-  CALL.cam=ns;if(peers.length)R.room.addStream(ns,peers,{k:'cam'});renderCall()}
+  CALL.cam=ns;sendMyStreams(callPeers());renderCall()}
 
 /* ---- dispositivos de áudio e vídeo ---- */
 const pref=k=>ls.get('dev:'+k,'');
@@ -1525,9 +1538,9 @@ function applyVolumes(){const vols=ls.get('vols',{});const master=ls.get('outvol
     if(a._g){a.volume=1;a._g.gain.value=v}else a.volume=Math.min(1,v)}}
 async function switchMic(){if(!CALL)return;const R=ROOMS[CALL.srv];const old=CALL.mic;let nm;try{nm=await getCallMic()}catch(e){toast('Não consegui usar esse microfone');return}
   const peers=callPeers();try{peers.length&&R.room.removeStream(old,peers)}catch(e){}old.getTracks().forEach(t=>t.stop());CALL.noMic=false;
-  CALL.mic=nm;nm.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);if(peers.length)R.room.addStream(nm,peers,{k:'mic'});levels.delete('me');watchLevel('me',nm)}
+  CALL.mic=nm;nm.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);sendMyStreams(callPeers());levels.delete('me');watchLevel('me',nm)}
 async function switchCamDevice(){if(!CALL?.cam)return;const R=ROOMS[CALL.srv];let ns;try{ns=await getCam()}catch(e){toast('Não consegui usar essa câmera');return}
-  const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());CALL.cam=ns;if(peers.length)R.room.addStream(ns,peers,{k:'cam'});renderCall()}
+  const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());CALL.cam=ns;sendMyStreams(callPeers());renderCall()}
 let micTest=null;
 function stopMicTest(){if(!micTest)return;cancelAnimationFrame(micTest.raf);micTest.P?.stop();try{micTest.loop?.pause()}catch(e){}micTest=null}
 async function startMicTest(md,hear){stopMicTest();
