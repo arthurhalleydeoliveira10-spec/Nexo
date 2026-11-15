@@ -557,7 +557,7 @@ input[type=range]:disabled{opacity:.4}
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-09';
+const APP_VERSION='2026.11.15-01';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -661,7 +661,7 @@ function banner(t,red){const b=$('#banner');b.textContent=t;b.classList.toggle('
    quem está online, jogos e música funcionam mesmo quando a conexão direta
    falha, e quem entra recebe o servidor na hora, mesmo sem ninguém online. */
 const BROKERS=['wss://public:public@public.cloud.shiftr.io','wss://broker.hivemq.com:8884/mqtt','wss://broker.emqx.io:8084/mqtt','wss://test.mosquitto.org:8081/mqtt'];
-const RELAY_ACTS=new Set(['hello','msg','chan','meta','typing','vstate','react','bye','game','music','dm']);
+const RELAY_ACTS=new Set(['heal','hello','msg','chan','meta','typing','vstate','react','bye','game','music','dm']);
 const SESSION=uid(10);
 const RL={mq:null,clients:[],subs:{},byTopic:{},seen:new Set(),lastState:{}};
 const _enc=new TextEncoder(),_dec=new TextDecoder();
@@ -725,6 +725,22 @@ async function relayState(code){const sub=RL.subs[code];const s=DATA.servers[cod
     if(buf.length>100000)continue;
     for(const c of RL.clients)if(c.connected)try{c.publish(sub.state,buf,{qos:1,retain:true})}catch(e){}
     RL.lastState[code]=sig;return}}
+/* conexão direta que travou: a pessoa aparece pelo canal de reserva mas a
+   conexão direta (que leva voz, câmera e tela) não volta. Refaz só a sala,
+   sem derrubar a chamada. */
+const healSince={},lastHeal={};
+function rejoinRoom(code){const R=ROOMS[code];if(!R)return;console.warn('refazendo a conexão direta',code);
+  for(const p of Object.keys(R.peers))dropRemote(p);
+  for(const u in VOICE[code]||{})if(VOICE[code][u].peer)VOICE[code][u].peer=null;
+  try{R.room.leave()}catch(e){}delete ROOMS[code];connect(code);renderAll()}
+setInterval(()=>{const now=Date.now();
+  for(const code in DATA.servers){const s=DATA.servers[code];if(!ROOMS[code]||!RL.subs[code])continue;
+    // só conta quem tem a versão nova (fala pelo canal de reserva)
+    const stuck=Object.keys(RL.subs[code].seen).filter(u=>u!==ME.id&&relayOnline(code,u)&&!p2pOnline(code,u)&&(s.members[u]?.ver||'')>='2026.11.14-06');
+    if(!stuck.length){delete healSince[code];continue}
+    healSince[code]??=now;
+    const wait=CALL&&CALL.srv===code?15000:40000;
+    if(now-healSince[code]>wait&&now-(lastHeal[code]||0)>90000){lastHeal[code]=now;delete healSince[code];rejoinRoom(code);relayPub(code,'heal',{})}}},5000);
 let stateT=null;function relayStateSoon(){clearTimeout(stateT);stateT=setTimeout(()=>{for(const c in DATA.servers)relayState(c)},6000)}
 setInterval(()=>{for(const c in DATA.servers)relayHello(c)},25000);
 // presença expira sozinha quando alguém some
@@ -749,7 +765,7 @@ function connect(code){if(!joinRoomFn){relayJoin(code);return}if(ROOMS[code])ret
   for(const n of ACTIONS){const[s,g]=room.makeAction(n);A[n]=s;g((d,p)=>{try{handle(code,n,d,p)}catch(e){console.warn(n,e)}})}
   room.onPeerJoin(p=>greet(code,p));
   room.onPeerLeave(p=>{const u=R.peers[p];delete R.peers[p];dropRemote(p);
-    if(u&&VOICE[code]?.[u]?.peer===p){delete VOICE[code][u];if(CALL&&CALL.srv===code)sfx('leave')}renderAll()});
+    if(u&&VOICE[code]?.[u]?.peer===p){if(relayOnline(code,u))VOICE[code][u].peer=null;else{delete VOICE[code][u];if(CALL&&CALL.srv===code)sfx('leave')}}renderAll()});
   room.onPeerStream((stream,p,meta)=>onStream(code,stream,p,meta));
 }
 function reconnectAll(){if(CALL)leaveCall(true);for(const code of Object.keys(ROOMS)){try{ROOMS[code].room.leave()}catch(e){}delete ROOMS[code];delete VOICE[code]}
@@ -785,6 +801,7 @@ function mergeServerState(code,d,from){const s=DATA.servers[code];let ch=false;
 function handle(code,n,d,p){const s=DATA.servers[code];if(!s)return;const R=ROOMS[code];
   const isR=typeof p==='string'&&p.startsWith('r:');
   const su=isR?p.slice(2):R?.peers[p];if(su&&s.meta.kicked?.[su]&&n!=='hello')return; // ignora quem foi expulso
+  if(isR&&n==='heal'){if(!p2pOnline(code,su)&&Date.now()-(lastHeal[code]||0)>20000){lastHeal[code]=Date.now();setTimeout(()=>rejoinRoom(code),300+Math.random()*700)}return}
   if(isR&&n==='hello'){if(!d?.u?.id||d.u.id!==su)return;if(s.meta.kicked?.[su]){relayPub(code,'meta',s.meta);return}
     const old=s.members[su];if(!old||(d.u.v||0)>=(old.v||0))s.members[su]={...d.u,seen:Date.now()};save();renderAll();return}
   if(!isR&&!R)return;
@@ -1425,15 +1442,21 @@ function toggleDeaf(){if(!CALL)return;CALL.deaf=!CALL.deaf;if(CALL.deaf){CALL._w
 async function toggleCam(){if(!CALL)return;const R=ROOMS[CALL.srv];
   if(CALL.cam){const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());CALL.cam=null}
   else{try{CALL.cam=await getCam()}catch(e){console.warn('camera',e);alertModal('Câmera',camErrorMsg(e));return}
-    const peers=callPeers();if(peers.length)try{R.room.addStream(CALL.cam,peers,{k:'cam'})}catch(e){console.warn(e)}}
+    const peers=callPeers();if(peers.length)try{ROOMS[CALL.srv]?.room.addStream(CALL.cam,peers,{k:'cam'})}catch(e){console.warn(e)}}
   broadcast(CALL.srv,'vstate',myV());renderAll()}
 async function toggleScreen(){if(!CALL)return;const R=ROOMS[CALL.srv];
   if(CALL.screen){const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.screen,peers)}catch(e){}CALL.screen.getTracks().forEach(t=>t.stop());CALL.screen=null}
   else{if(!navigator.mediaDevices?.getDisplayMedia){toast('Compartilhar tela só funciona no computador (Chrome, Edge ou Firefox).');return}
-    try{CALL.screen=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30}},audio:true})}catch(e){return}
+    try{CALL.screen=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30}},audio:true})}
+    catch(e){if(e.name==='NotAllowedError'){if(/system/i.test(e.message||''))alertModal('Compartilhar tela',screenErr(e));return} // cancelou ou o sistema bloqueou
+      try{CALL.screen=await navigator.mediaDevices.getDisplayMedia({video:true})}catch(e2){if(e2.name!=='NotAllowedError'||/system/i.test(e2.message||''))alertModal('Compartilhar tela',screenErr(e2));return}}
+    if(!CALL?.screen)return;
+    CALL.screen.getVideoTracks().forEach(t=>{try{t.contentHint='detail'}catch(e){}});
     CALL.screen.getVideoTracks()[0].addEventListener('ended',()=>{if(CALL?.screen)toggleScreen()});
-    const peers=callPeers();if(peers.length)R.room.addStream(CALL.screen,peers,{k:'screen'});UI.focus='me:screen'}
+    const peers=callPeers();if(peers.length)try{ROOMS[CALL.srv]?.room.addStream(CALL.screen,peers,{k:'screen'})}catch(e){console.warn(e)};UI.focus='me:screen'}
   broadcast(CALL.srv,'vstate',myV());renderAll()}
+function screenErr(e){if(/system/i.test(e?.message||''))return 'O Windows/Mac bloqueou a captura de tela para o navegador. No Mac: Ajustes → Privacidade → Gravação de Tela. No Windows, feche programas de proteção que bloqueiam captura e tente de novo.';
+  return 'Não consegui compartilhar a tela ('+(e?.name||'erro')+'). Tente escolher uma janela ou aba em vez da tela inteira.'}
 async function switchCam(){if(!CALL?.cam)return;const cur=CALL.cam.getVideoTracks()[0]?.getSettings?.().facingMode;const R=ROOMS[CALL.srv];
   let ns;try{ns=await navigator.mediaDevices.getUserMedia({video:{facingMode:cur==='environment'?'user':'environment'},audio:false})}catch(e){toast('Não deu para trocar a câmera');return}
   const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());
