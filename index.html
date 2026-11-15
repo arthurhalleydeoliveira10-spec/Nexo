@@ -557,7 +557,7 @@ input[type=range]:disabled{opacity:.4}
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-08';
+const APP_VERSION='2026.11.14-09';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -1357,7 +1357,14 @@ function arenaHTML(g){const me=g.players.indexOf(ME.id);const A=g.ar||{};
    <div class="gs">${A.started?`Partida rolando! ${me>=0?`<button class="btn" data-aropen="${g.id}">Entrar na arena</button>`:'<span>(assistindo pelo chat)</span>'}`:`${g.players.length}/8 jogadores ${me<0&&g.players.length<8?`<button class="btn" data-gjoin="${g.id}">Entrar no jogo</button>`:''}${me===0?(g.players.length>=2?`<button class="btn" data-arstart="${g.id}">Começar partida</button>`:'<span>Esperando mais gente…</span>'):me>0?'<span>Esperando o dono começar…</span>':''}`}</div>`}
 
 /* ---- notificações / sons ---- */
-let actx=null;function ac(){try{return actx??=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}
+let actx=null;function ac(){if(actx)return actx;try{actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return null}
+  actx.onstatechange=()=>{if(actx.state!=='running'&&(CALL||micTest))actx.resume().catch(()=>{})};acSink();return actx}
+function acSink(){const id=pref('out');if(actx?.setSinkId)actx.setSinkId(id||'').catch(()=>{})}
+// o navegador só libera som depois de um clique: a cada clique, acorda o áudio e o que ficou travado
+const stuckAudio=new Set();
+addEventListener('pointerdown',()=>{if(actx&&actx.state!=='running')actx.resume().catch(()=>{});for(const a of stuckAudio)a.play().then(()=>stuckAudio.delete(a)).catch(()=>{})},true);
+function playEl(a){a.play().then(()=>stuckAudio.delete(a)).catch(()=>{stuckAudio.add(a);toastOnce('audio','Clique em qualquer lugar do Nexo para ouvir a chamada.')})}
+const _toasted={};function toastOnce(k,m){if(_toasted[k]&&Date.now()-_toasted[k]<15000)return;_toasted[k]=Date.now();toast(m)}
 function sfx(kind){if(!ls.get('sfx-on',!ls.get('mute-sfx',false)))return;const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);
   const f={msg:[880,1320],send:[600,700],join:[523,784],leave:[784,523],ring:[660,880]}[kind]||[700,900];const t=a.currentTime;
   o.type='sine';o.frequency.setValueAtTime(f[0],t);o.frequency.linearRampToValueAtTime(f[1],t+.12);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(kind==='send'?.03:.08,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+.25);o.start(t);o.stop(t+.3)}
@@ -1389,10 +1396,10 @@ function onVState(code,u,p,d){VOICE[code]??={};const prev=VOICE[code][u];const s
 function onStream(code,stream,p,meta){const k=meta?.k||(stream.getVideoTracks().length?'cam':'mic');
   REMOTE[p]??={};REMOTE[p][k]=stream;
   stream.getTracks().forEach(t=>t.addEventListener('ended',()=>{if(REMOTE[p]?.[k]===stream){delete REMOTE[p][k];renderCall()}}));
-  if(k==='mic'){let a=document.getElementById('au-'+p);if(!a){a=document.createElement('audio');a.id='au-'+p;a.autoplay=true;a.playsInline=true;$('#audios').appendChild(a)}a.srcObject=stream;a.muted=!!CALL?.deaf;applySink(a);applyVolumes();a.play().catch(()=>{});watchLevel('p:'+p,stream)}
+  if(k==='mic'){let a=document.getElementById('au-'+p);if(!a){a=document.createElement('audio');a.id='au-'+p;a.autoplay=true;a.playsInline=true;$('#audios').appendChild(a)}a.srcObject=stream;a.muted=!!CALL?.deaf;applySink(a);applyVolumes();playEl(a);watchLevel('p:'+p,stream)}
   renderCall()}
 function dropRemote(p){delete REMOTE[p];document.getElementById('au-'+p)?.remove();levels.delete('p:'+p);for(const k of['cam','screen'])tileEls.get(p+':'+k)?.remove(),tileEls.delete(p+':'+k);renderCall()}
-function applyDeaf(){document.querySelectorAll('#audios audio').forEach(a=>a.muted=!!CALL?.deaf);document.querySelectorAll('#grid video:not([data-self]),#strip video:not([data-self])').forEach(v=>{if(v.dataset.k==='screen')v.muted=!!CALL?.deaf})}
+function applyDeaf(){document.querySelectorAll('#audios audio').forEach(a=>a.muted=!!CALL?.deaf);applyVolumes();document.querySelectorAll('#grid video:not([data-self]),#strip video:not([data-self])').forEach(v=>{if(v.dataset.k==='screen')v.muted=!!CALL?.deaf})}
 
 async function joinCall(code,ch,withCam){if(!netOK){toast('Sem conexão com a rede.');return}
   if(!navigator.mediaDevices?.getUserMedia){toast('Seu navegador não permite chamadas aqui. Abra o Nexo por um link https.');return}
@@ -1444,9 +1451,11 @@ const micVol=()=>ls.get('micvol',100),micAuto=()=>ls.get('micsens-auto',true),mi
 function makeMicProc(raw){const a=ac();if(!a)return null;
   try{const src=a.createMediaStreamSource(raw),g=a.createGain(),gate=a.createGain(),an=a.createAnalyser(),dst=a.createMediaStreamDestination();
     g.gain.value=micVol()/100;an.fftSize=1024;src.connect(g);g.connect(an);g.connect(gate);gate.connect(dst);
-    const P={raw,out:dst.stream,gain:g,gate,db:-100,th:-50,open:true,hold:0,noise:-65,buf:new Float32Array(an.fftSize)};
+    const P={raw,out:dst.stream,gain:g,gate,db:-100,th:-50,open:true,hold:0,noise:-65,buf:new Float32Array(an.fftSize),mins:[],cur:0,curT:Date.now()};
     P.tick=setInterval(()=>{an.getFloatTimeDomainData(P.buf);let q=0;for(const v of P.buf)q+=v*v;const db=20*Math.log10(Math.sqrt(q/P.buf.length)+1e-9);P.db=db;
-      if(micAuto()){P.noise=db<P.noise?P.noise*.85+db*.15:P.noise+.03;P.th=Math.min(-20,Math.max(-75,P.noise+14))}else P.th=micSens();
+      if(micAuto()){ // ruído de fundo = o trecho mais baixo dos últimos ~8 segundos (a fala sempre tem pausas)
+        P.cur=Math.min(P.cur||0,db);if(Date.now()-P.curT>500){P.mins.push(P.cur);if(P.mins.length>16)P.mins.shift();P.cur=0;P.curT=Date.now()}
+        if(P.mins.length)P.noise=Math.min(...P.mins);P.th=Math.min(-30,Math.max(-72,P.noise+12))}else P.th=micSens();
       const now=Date.now(),t=a.currentTime;
       if(db>P.th){P.hold=now+350;if(!P.open){P.open=true;gate.gain.setTargetAtTime(1,t,.008)}}
       else if(P.open&&now>P.hold){P.open=false;gate.gain.setTargetAtTime(0,t,.06)}},25);
@@ -1454,7 +1463,13 @@ function makeMicProc(raw){const a=ac();if(!a)return null;
     P.stop=()=>{clearInterval(P.tick);try{src.disconnect();g.disconnect();gate.disconnect()}catch(e){}raw.getTracks().forEach(x=>x.stop());P.out.getTracks().forEach(x=>x.stop())};
     return P}catch(e){console.warn('mic proc',e);return null}}
 let MICP=null;
-async function getCallMic(){const raw=await getMic();ac()?.resume?.();MICP?.stop();MICP=makeMicProc(raw);return MICP?MICP.out:raw}
+async function getCallMic(){const raw=await getMic();const a=ac();
+  if(a&&a.state!=='running')await Promise.race([a.resume().catch(()=>{}),new Promise(r=>setTimeout(r,700))]);
+  MICP?.stop();MICP=null;
+  // G: microfone desconectado no meio da chamada → volta para o padrão
+  raw.getAudioTracks().forEach(t=>t.addEventListener('ended',()=>{if(CALL&&!CALL.noMic&&(MICP?MICP.raw===raw:CALL.mic===raw)){toast('O microfone foi desconectado. Usando o padrão.');ls.set('dev:mic','');switchMic()}}));
+  if(!a||a.state!=='running'){console.warn('áudio do navegador parado: microfone sem ajustes');return raw}
+  MICP=makeMicProc(raw);return MICP?MICP.out:raw}
 function micMeter(md,P){const bar=md.querySelector('#lvl'),mk=md.querySelector('#lvlth');if(!bar)return;
   const pct=db=>Math.max(0,Math.min(100,(db+100)));bar.style.width=pct(P.db)+'%';bar.classList.toggle('open',P.open);if(mk)mk.style.left=pct(P.th)+'%'}
 async function getCam(){const gum=v=>navigator.mediaDevices.getUserMedia({video:v,audio:false});
@@ -1474,9 +1489,10 @@ function camErrorMsg(e){const n=e?.name;
   return 'Não consegui abrir a câmera ('+(n||'erro')+'). Feche outros programas que usam a câmera e tente de novo.'}
 function applySink(el){const id=pref('out');if(el&&el.setSinkId&&id)el.setSinkId(id).catch(()=>{})}
 function applyVolumes(){const vols=ls.get('vols',{});const master=ls.get('outvol',100)/100;
-  for(const a of document.querySelectorAll('#audios audio')){const p=a.id.slice(3);const u=CALL?ROOMS[CALL.srv]?.peers[p]:null;const v=((vols[u]??100)/100)*master;a.volume=Math.min(1,v);
-    // acima de 100%: usa um ganho extra
-    if(v>1&&ac()){if(!a._g){try{const src=ac().createMediaElementSource(a);const g=ac().createGain();src.connect(g);g.connect(ac().destination);a._g=g}catch(e){}}if(a._g)a._g.gain.value=v}else if(a._g)a._g.gain.value=1}}
+  for(const a of document.querySelectorAll('#audios audio')){const p=a.id.slice(3);const u=CALL?ROOMS[CALL.srv]?.peers[p]:null;const v=CALL?.deaf?0:((vols[u]??100)/100)*master;
+    // acima de 100%: o som passa por um amplificador (que segue a saída escolhida)
+    if(v>1&&!a._g&&ac()){try{const src=ac().createMediaElementSource(a);const g=ac().createGain();src.connect(g);g.connect(ac().destination);a._g=g;acSink()}catch(e){}}
+    if(a._g){a.volume=1;a._g.gain.value=v}else a.volume=Math.min(1,v)}}
 async function switchMic(){if(!CALL)return;const R=ROOMS[CALL.srv];const old=CALL.mic;let nm;try{nm=await getCallMic()}catch(e){toast('Não consegui usar esse microfone');return}
   const peers=callPeers();try{peers.length&&R.room.removeStream(old,peers)}catch(e){}old.getTracks().forEach(t=>t.stop());CALL.noMic=false;
   CALL.mic=nm;nm.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);if(peers.length)R.room.addStream(nm,peers,{k:'mic'});levels.delete('me');watchLevel('me',nm)}
@@ -1694,7 +1710,7 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
     md.querySelectorAll('input[data-key]').forEach(c=>c.onchange=()=>{ls.set(c.dataset.key,c.checked);if(['ns','echo','agc'].includes(c.dataset.key)&&CALL)switchMic()});
     md.querySelector('#perm')?.addEventListener('click',async()=>{try{const st=await navigator.mediaDevices.getUserMedia({audio:true,video:true}).catch(()=>navigator.mediaDevices.getUserMedia({audio:true}));st.getTracks().forEach(t=>t.stop())}catch(e){toast('Permissão negada');return}settingsModal()});
     md.querySelector('#dmic')?.addEventListener('change',e=>{ls.set('dev:mic',e.target.value);if(CALL)switchMic();if(micTest)startMicTest(md,md.querySelector('#hear').checked);toast('Microfone trocado')});
-    md.querySelector('#dout')?.addEventListener('change',e=>{ls.set('dev:out',e.target.value);document.querySelectorAll('#audios audio,#grid video,#strip video').forEach(applySink);toast('Saída de áudio trocada')});
+    md.querySelector('#dout')?.addEventListener('change',e=>{ls.set('dev:out',e.target.value);acSink();document.querySelectorAll('#audios audio,#grid video,#strip video').forEach(applySink);toast('Saída de áudio trocada')});
     md.querySelector('#dcam')?.addEventListener('change',e=>{ls.set('dev:cam',e.target.value);if(CALL?.cam)switchCamDevice();toast('Câmera trocada')});
     md.querySelector('#tmic')?.addEventListener('click',e=>{if(micTest){stopMicTest();e.target.textContent='Testar microfone';md.querySelector('#lvl').style.width='0'}else{startMicTest(md,md.querySelector('#hear').checked);e.target.textContent='Parar teste'}});
     md.querySelector('#hear')?.addEventListener('change',e=>{if(micTest)startMicTest(md,e.target.checked)});
