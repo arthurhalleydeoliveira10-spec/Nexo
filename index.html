@@ -452,6 +452,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
 .hc{background:rgba(255,255,255,.04);border:1px solid var(--edge)}
 .hc:hover{background:rgba(255,255,255,.07)}
 .game{background:rgba(9,8,17,.45);border:1px solid var(--edge)}
+.micmeter{position:relative;height:14px;background:var(--bg0);border-radius:7px;margin-top:10px;overflow:hidden;border:1px solid var(--edge)}
+.micmeter #lvl{height:100%;width:0;background:#5d5880;transition:width .05s}.micmeter #lvl.open{background:linear-gradient(90deg,#2fbf7a,#3ee08f)}
+.micmeter #lvlth{position:absolute;top:-2px;bottom:-2px;width:3px;margin-left:-1px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(255,255,255,.6)}
+input[type=range]:disabled{opacity:.4}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:900px){
   #mem{position:fixed;right:0;top:var(--sat);bottom:0;z-index:30;box-shadow:-10px 0 40px rgba(0,0,0,.5)}
@@ -553,7 +557,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;ba
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.14-07';
+const APP_VERSION='2026.11.14-08';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -1394,7 +1398,7 @@ async function joinCall(code,ch,withCam){if(!netOK){toast('Sem conexão com a re
   if(!navigator.mediaDevices?.getUserMedia){toast('Seu navegador não permite chamadas aqui. Abra o Nexo por um link https.');return}
   if(CALL&&CALL.srv===code&&CALL.ch===ch){if(withCam&&!CALL.cam)toggleCam();return}
   if(CALL)leaveCall(true);
-  let mic,noMic=false;try{mic=await getMic()}
+  let mic,noMic=false;try{mic=await getCallMic()}
   catch(e){console.warn('mic',e);
     // sem microfone ainda dá para entrar: ouvindo, com câmera e tela
     try{const a=ac()||new AudioContext();const d=a.createMediaStreamDestination();mic=d.stream;noMic=true}catch(x){toast('Não consegui abrir o microfone.');return}
@@ -1403,7 +1407,7 @@ async function joinCall(code,ch,withCam){if(!netOK){toast('Sem conexão com a re
   watchLevel('me',mic);broadcast(code,'vstate',myV());sendMyStreams(callPeers());sfx('join');
   if(withCam)await toggleCam();
   if(V.srv!==code||V.ch!==ch){V.srv=code;V.dm=null;openChannel(ch)}else renderAll()}
-function leaveCall(silent){if(!CALL)return;const R=ROOMS[CALL.srv];const peers=callPeers();
+function leaveCall(silent){if(!CALL)return;MICP?.stop();MICP=null;const R=ROOMS[CALL.srv];const peers=callPeers();
   for(const s of[CALL.mic,CALL.cam,CALL.screen])if(s){try{peers.length&&R?.room.removeStream(s,peers)}catch(e){}s.getTracks().forEach(t=>t.stop())}
   const code=CALL.srv;CALL=null;broadcast(code,'vstate',{u:ME.id,ch:null});
   for(const p of Object.keys(REMOTE))dropRemote(p);levels.delete('me');speaking.delete(ME.id);
@@ -1433,6 +1437,26 @@ const pref=k=>ls.get('dev:'+k,'');
 function audioC(){const c={echoCancellation:ls.get('echo',true),noiseSuppression:ls.get('ns',true),autoGainControl:ls.get('agc',true)};if(pref('mic'))c.deviceId={exact:pref('mic')};return c}
 async function getMic(){try{return await navigator.mediaDevices.getUserMedia({audio:audioC(),video:false})}
   catch(e){if(pref('mic')&&(e.name==='OverconstrainedError'||e.name==='NotFoundError')){ls.set('dev:mic','');toast('O microfone escolhido não foi encontrado. Usando o padrão.');return navigator.mediaDevices.getUserMedia({audio:audioC(),video:false})}throw e}}
+/* processamento do microfone: volume e sensibilidade (como no Discord).
+   A sensibilidade é um "portão": abaixo do limite o microfone fica mudo,
+   assim barulho baixo (teclado, ventilador) não vai para a chamada. */
+const micVol=()=>ls.get('micvol',100),micAuto=()=>ls.get('micsens-auto',true),micSens=()=>ls.get('micsens',-50);
+function makeMicProc(raw){const a=ac();if(!a)return null;
+  try{const src=a.createMediaStreamSource(raw),g=a.createGain(),gate=a.createGain(),an=a.createAnalyser(),dst=a.createMediaStreamDestination();
+    g.gain.value=micVol()/100;an.fftSize=1024;src.connect(g);g.connect(an);g.connect(gate);gate.connect(dst);
+    const P={raw,out:dst.stream,gain:g,gate,db:-100,th:-50,open:true,hold:0,noise:-65,buf:new Float32Array(an.fftSize)};
+    P.tick=setInterval(()=>{an.getFloatTimeDomainData(P.buf);let q=0;for(const v of P.buf)q+=v*v;const db=20*Math.log10(Math.sqrt(q/P.buf.length)+1e-9);P.db=db;
+      if(micAuto()){P.noise=db<P.noise?P.noise*.85+db*.15:P.noise+.03;P.th=Math.min(-20,Math.max(-75,P.noise+14))}else P.th=micSens();
+      const now=Date.now(),t=a.currentTime;
+      if(db>P.th){P.hold=now+350;if(!P.open){P.open=true;gate.gain.setTargetAtTime(1,t,.008)}}
+      else if(P.open&&now>P.hold){P.open=false;gate.gain.setTargetAtTime(0,t,.06)}},25);
+    P.setVol=()=>{g.gain.value=micVol()/100};
+    P.stop=()=>{clearInterval(P.tick);try{src.disconnect();g.disconnect();gate.disconnect()}catch(e){}raw.getTracks().forEach(x=>x.stop());P.out.getTracks().forEach(x=>x.stop())};
+    return P}catch(e){console.warn('mic proc',e);return null}}
+let MICP=null;
+async function getCallMic(){const raw=await getMic();ac()?.resume?.();MICP?.stop();MICP=makeMicProc(raw);return MICP?MICP.out:raw}
+function micMeter(md,P){const bar=md.querySelector('#lvl'),mk=md.querySelector('#lvlth');if(!bar)return;
+  const pct=db=>Math.max(0,Math.min(100,(db+100)));bar.style.width=pct(P.db)+'%';bar.classList.toggle('open',P.open);if(mk)mk.style.left=pct(P.th)+'%'}
 async function getCam(){const gum=v=>navigator.mediaDevices.getUserMedia({video:v,audio:false});
   const hd={width:{ideal:1280},height:{ideal:720}};let first;
   // tenta em ordem: câmera escolhida, padrão em HD, padrão simples, depois cada câmera do PC
@@ -1453,19 +1477,20 @@ function applyVolumes(){const vols=ls.get('vols',{});const master=ls.get('outvol
   for(const a of document.querySelectorAll('#audios audio')){const p=a.id.slice(3);const u=CALL?ROOMS[CALL.srv]?.peers[p]:null;const v=((vols[u]??100)/100)*master;a.volume=Math.min(1,v);
     // acima de 100%: usa um ganho extra
     if(v>1&&ac()){if(!a._g){try{const src=ac().createMediaElementSource(a);const g=ac().createGain();src.connect(g);g.connect(ac().destination);a._g=g}catch(e){}}if(a._g)a._g.gain.value=v}else if(a._g)a._g.gain.value=1}}
-async function switchMic(){if(!CALL)return;const R=ROOMS[CALL.srv];let nm;try{nm=await getMic()}catch(e){toast('Não consegui usar esse microfone');return}
-  const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.mic,peers)}catch(e){}CALL.mic.getTracks().forEach(t=>t.stop());
+async function switchMic(){if(!CALL)return;const R=ROOMS[CALL.srv];const old=CALL.mic;let nm;try{nm=await getCallMic()}catch(e){toast('Não consegui usar esse microfone');return}
+  const peers=callPeers();try{peers.length&&R.room.removeStream(old,peers)}catch(e){}old.getTracks().forEach(t=>t.stop());CALL.noMic=false;
   CALL.mic=nm;nm.getAudioTracks().forEach(t=>t.enabled=!CALL.mute);if(peers.length)R.room.addStream(nm,peers,{k:'mic'});levels.delete('me');watchLevel('me',nm)}
 async function switchCamDevice(){if(!CALL?.cam)return;const R=ROOMS[CALL.srv];let ns;try{ns=await getCam()}catch(e){toast('Não consegui usar essa câmera');return}
   const peers=callPeers();try{peers.length&&R.room.removeStream(CALL.cam,peers)}catch(e){}CALL.cam.getTracks().forEach(t=>t.stop());CALL.cam=ns;if(peers.length)R.room.addStream(ns,peers,{k:'cam'});renderCall()}
 let micTest=null;
-function stopMicTest(){if(!micTest)return;cancelAnimationFrame(micTest.raf);micTest.stream.getTracks().forEach(t=>t.stop());try{micTest.loop?.pause()}catch(e){}micTest=null}
-async function startMicTest(md,hear){stopMicTest();let st;try{st=await getMic()}catch(e){toast('Permita o microfone para testar');return}
-  const a=ac();a?.resume?.();const an=a.createAnalyser();an.fftSize=512;a.createMediaStreamSource(st).connect(an);const buf=new Uint8Array(an.fftSize);
-  micTest={stream:st,raf:0,loop:null};
-  if(hear){const el=new Audio();el.srcObject=st;applySink(el);el.play().catch(()=>{});micTest.loop=el}
-  const bar=md.querySelector('#lvl');const tick=()=>{an.getByteTimeDomainData(buf);let s=0;for(const v of buf){const x=(v-128)/128;s+=x*x}const r=Math.min(1,Math.sqrt(s/buf.length)*4);
-    if(bar)bar.style.width=(r*100).toFixed(0)+'%';micTest.raf=requestAnimationFrame(tick)};tick()}
+function stopMicTest(){if(!micTest)return;cancelAnimationFrame(micTest.raf);micTest.P?.stop();try{micTest.loop?.pause()}catch(e){}micTest=null}
+async function startMicTest(md,hear){stopMicTest();
+  if(CALL&&MICP){micTest={P:null,raf:0};const tick=()=>{micMeter(md,MICP);micTest.raf=requestAnimationFrame(tick)};tick();return} // já está em chamada: mostra o microfone da chamada
+  let st;try{st=await getMic()}catch(e){toast('Permita o microfone para testar');return}
+  ac()?.resume?.();const P=makeMicProc(st);if(!P){st.getTracks().forEach(t=>t.stop());return}
+  micTest={P,raf:0,loop:null};
+  if(hear){const el=new Audio();el.srcObject=P.out;applySink(el);el.play().catch(()=>{});micTest.loop=el}
+  const tick=()=>{micMeter(md,P);micTest.raf=requestAnimationFrame(tick)};tick()}
 async function testOutput(){const a=ac();if(!a)return;a.resume?.();const dst=a.createMediaStreamDestination();const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(dst);
   const t=a.currentTime;[523,659,784].forEach((f,i)=>o.frequency.setValueAtTime(f,t+i*.18));g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.25,t+.03);g.gain.setValueAtTime(.25,t+.5);g.gain.exponentialRampToValueAtTime(.0001,t+.6);
   const el=new Audio();el.srcObject=dst.stream;el.volume=ls.get('outvol',100)/100>1?1:ls.get('outvol',100)/100;applySink(el);await el.play().catch(()=>{});o.start(t);o.stop(t+.65);setTimeout(()=>el.pause(),900)}
@@ -1621,7 +1646,12 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
    ${needPerm?`<div class="opt" style="cursor:default;margin-top:12px"><div style="font-size:22px">🎙️</div><div style="flex:1"><b>Mostrar o nome dos aparelhos</b><small>O navegador só mostra os nomes depois que você permite o microfone e a câmera.</small></div><button type="button" class="btn s" id="perm">Permitir</button></div>`:''}
    <label>Microfone</label><select id="dmic">${opts('audioinput',pref('mic'))}</select>
    <div style="display:flex;gap:8px;align-items:center;margin-top:10px"><button type="button" class="btn s" id="tmic">Testar microfone</button><label style="display:flex;gap:6px;align-items:center;margin:0;font-size:13px;font-weight:500"><input type="checkbox" id="hear" style="width:16px;height:16px;accent-color:var(--ac)"> Ouvir minha voz</label></div>
-   <div style="height:10px;background:var(--bg0);border-radius:6px;margin-top:10px;overflow:hidden"><div id="lvl" style="height:100%;width:0;background:var(--grad);transition:width .06s"></div></div>
+   <label>Volume do microfone: <span id="mvl">${micVol()}%</span></label><input type="range" id="mvol" min="0" max="200" value="${micVol()}" style="padding:0;accent-color:var(--ac)">
+   <label>Sensibilidade do microfone</label>
+   ${chk('msa','micsens-auto','Ajustar a sensibilidade automaticamente')}
+   <div class="micmeter"><div id="lvl"></div><div id="lvlth" style="left:${micSens()+100}%"></div></div>
+   <input type="range" id="msens" min="-100" max="0" value="${micSens()}" style="padding:0;accent-color:var(--ac)" ${micAuto()?'disabled':''}>
+   <p class="sub" style="font-size:12.5px;margin:4px 0 0">Clique em <b>Testar microfone</b> e fale. A barra fica <b style="color:var(--green)">verde</b> quando sua voz passa. Arraste para a <b>esquerda</b> para pegar até voz baixa, ou para a <b>direita</b> para cortar barulhos (teclado, ventilador).</p>
    <label>Saída de áudio (fone ou caixa de som)</label>${sinkOK?`<select id="dout">${opts('audiooutput',pref('out'))}</select>`:`<p class="sub" style="margin:0">Este navegador não deixa escolher a saída. No computador, use o Chrome ou o Edge.</p>`}
    <label>Volume de saída: <span id="ovl">${ls.get('outvol',100)}%</span></label><input type="range" id="ovol" min="0" max="200" value="${ls.get('outvol',100)}" style="padding:0;accent-color:var(--ac)">
    <div style="margin-top:10px"><button type="button" class="btn s" id="tout">Tocar som de teste</button></div>
@@ -1668,6 +1698,9 @@ async function settingsModal(tab){if(tab)setTab=tab;const np='Notification' in w
     md.querySelector('#dcam')?.addEventListener('change',e=>{ls.set('dev:cam',e.target.value);if(CALL?.cam)switchCamDevice();toast('Câmera trocada')});
     md.querySelector('#tmic')?.addEventListener('click',e=>{if(micTest){stopMicTest();e.target.textContent='Testar microfone';md.querySelector('#lvl').style.width='0'}else{startMicTest(md,md.querySelector('#hear').checked);e.target.textContent='Parar teste'}});
     md.querySelector('#hear')?.addEventListener('change',e=>{if(micTest)startMicTest(md,e.target.checked)});
+    md.querySelector('#mvol')?.addEventListener('input',e=>{ls.set('micvol',+e.target.value);md.querySelector('#mvl').textContent=e.target.value+'%';MICP?.setVol();micTest?.P?.setVol()});
+    md.querySelector('#msens')?.addEventListener('input',e=>{ls.set('micsens',+e.target.value);md.querySelector('#lvlth').style.left=(+e.target.value+100)+'%'});
+    md.querySelector('#msa')?.addEventListener('change',e=>{ls.set('micsens-auto',e.target.checked);const r=md.querySelector('#msens');r.disabled=e.target.checked;if(!e.target.checked){const th=Math.round((micTest?.P||MICP)?.th??micSens());r.value=th;ls.set('micsens',th);md.querySelector('#lvlth').style.left=(th+100)+'%'}});
     md.querySelector('#tout')?.addEventListener('click',testOutput);
     md.querySelector('#ovol')?.addEventListener('input',e=>{ls.set('outvol',+e.target.value);md.querySelector('#ovl').textContent=e.target.value+'%';applyVolumes()});
     md.querySelector('#np')?.addEventListener('click',async()=>{try{const r=await Notification.requestPermission();toast(r==='granted'?'Notificações ativadas!':'Permissão negada');settingsModal()}catch(e){}});
