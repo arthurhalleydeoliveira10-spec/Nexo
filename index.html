@@ -557,7 +557,7 @@ input[type=range]:disabled{opacity:.4}
    pela biblioteca Trystero através de relays públicos.
    ===================================================================== */
 const APP_ID='nexo-chat-br-2026-v2';
-const APP_VERSION='2026.11.15-01';
+const APP_VERSION='2026.11.15-02';
 const MAIN_HOST='app--nexotche.netlify.app';
 // todo mundo precisa estar no mesmo site para se encontrar
 if(/netlify\.app$/.test(location.hostname)&&location.hostname!==MAIN_HOST){location.replace('https://'+MAIN_HOST+location.pathname+location.search+location.hash)}
@@ -739,8 +739,15 @@ setInterval(()=>{const now=Date.now();
     const stuck=Object.keys(RL.subs[code].seen).filter(u=>u!==ME.id&&relayOnline(code,u)&&!p2pOnline(code,u)&&(s.members[u]?.ver||'')>='2026.11.14-06');
     if(!stuck.length){delete healSince[code];continue}
     healSince[code]??=now;
-    const wait=CALL&&CALL.srv===code?15000:40000;
-    if(now-healSince[code]>wait&&now-(lastHeal[code]||0)>90000){lastHeal[code]=now;delete healSince[code];rejoinRoom(code);relayPub(code,'heal',{})}}},5000);
+    // só refaz se a voz/tela estiver em jogo: alguém travado está na mesma chamada que eu
+    const inMyCall=CALL&&CALL.srv===code&&stuck.some(u=>VOICE[code]?.[u]?.ch===CALL.ch);
+    const wait=inMyCall?12000:150000;
+    if(now-healSince[code]>wait&&now-(lastHeal[code]||0)>(inMyCall?45000:300000)){lastHeal[code]=now;delete healSince[code];rejoinRoom(code);relayPub(code,'heal',{to:stuck})}}},5000);
+window.__nexoDiag=()=>Object.fromEntries(Object.keys(DATA.servers).map(c=>{const R=ROOMS[c];const pc=R?.room.getPeers?.()||{};
+  return[DATA.servers[c].meta.name,{p2p:R?Object.entries(R.peers).map(([p,u])=>[nameOf(u),pc[p]?.connectionState,pc[p]?.iceConnectionState]):null,
+    rtc:Object.entries(pc).map(([p,x])=>[p.slice(0,6),R.peers[p]?nameOf(R.peers[p]):'?',x.connectionState,x.iceConnectionState]),
+    reserva:Object.entries(RL.subs[c]?.seen||{}).map(([u,t])=>[nameOf(u),Math.round((Date.now()-t)/1000)+'s',DATA.servers[c].members[u]?.ver]),
+    heal:lastHeal[c]?Math.round((Date.now()-lastHeal[c])/1000)+'s atrás':null,call:CALL?.ch||null,turn:!!TURN?.length}]}));
 let stateT=null;function relayStateSoon(){clearTimeout(stateT);stateT=setTimeout(()=>{for(const c in DATA.servers)relayState(c)},6000)}
 setInterval(()=>{for(const c in DATA.servers)relayHello(c)},25000);
 // presença expira sozinha quando alguém some
@@ -801,7 +808,7 @@ function mergeServerState(code,d,from){const s=DATA.servers[code];let ch=false;
 function handle(code,n,d,p){const s=DATA.servers[code];if(!s)return;const R=ROOMS[code];
   const isR=typeof p==='string'&&p.startsWith('r:');
   const su=isR?p.slice(2):R?.peers[p];if(su&&s.meta.kicked?.[su]&&n!=='hello')return; // ignora quem foi expulso
-  if(isR&&n==='heal'){if(!p2pOnline(code,su)&&Date.now()-(lastHeal[code]||0)>20000){lastHeal[code]=Date.now();setTimeout(()=>rejoinRoom(code),300+Math.random()*700)}return}
+  if(isR&&n==='heal'){if(d?.to?.includes(ME.id)&&!p2pOnline(code,su)&&Date.now()-(lastHeal[code]||0)>20000){lastHeal[code]=Date.now();setTimeout(()=>rejoinRoom(code),300+Math.random()*700)}return}
   if(isR&&n==='hello'){if(!d?.u?.id||d.u.id!==su)return;if(s.meta.kicked?.[su]){relayPub(code,'meta',s.meta);return}
     const old=s.members[su];if(!old||(d.u.v||0)>=(old.v||0))s.members[su]={...d.u,seen:Date.now()};save();renderAll();return}
   if(!isR&&!R)return;
